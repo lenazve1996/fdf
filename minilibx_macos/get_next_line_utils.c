@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line_utils.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ayajirob <ayajirob@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ayajirob@student.42.fr <ayajirob>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/04 18:48:01 by ayajirob          #+#    #+#             */
-/*   Updated: 2021/12/04 19:16:35 by ayajirob         ###   ########.fr       */
+/*   Updated: 2021/12/24 13:45:34 by ayajirob@st      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,8 +80,6 @@ char	*ft_strjoin(char *s1, char *s2)
 	ft_strlcat(new_str, s2, s2_size + s1_size + 1);
 	free(s1);
 	s1 = NULL;
-	free(s2);
-	s2 = NULL;
 	return (new_str);
 }
 
