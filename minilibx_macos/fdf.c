@@ -41,59 +41,6 @@ typedef struct	s_data{
 	t_img	*images;
 }				t_data;
 
-//int ft_key(int keycode, t_data *data)
-//{
-//	int	i;
-//	int	y;
-
-//	printf("Hello!\n");
-//	printf("%d\n", keycode);
-//	if (keycode == 0)
-//	{
-//		i = 0;
-//		while (i < 20)
-//		{
-//			y = 40;
-//			while (y < 60)
-//				mlx_pixel_put(data->mlx, data->win, i, y++, 0x00FF0000);
-//			i++;
-//		}
-//	}
-//	else if (keycode == 1)
-//	{
-//		i = 40;
-//		while (i < 60)
-//		{
-//			y = 40;
-//			while (y < 60)
-//				mlx_pixel_put(data->mlx, data->win, i, y++, 0x00FF0000);
-//			i++;
-//		}
-//	}
-//	else if (keycode == 2)
-//	{
-//		i = 80;
-//		while (i < 100)
-//		{
-//			y = 40;
-//			while (y < 60)
-//				mlx_pixel_put(data->mlx, data->win, i, y++, 0x00FF0000);
-//			i++;
-//		}
-//	}
-//	else if (keycode == 13)
-//	{
-//		i = 40;
-//		while (i < 60)
-//		{
-//			y = 0;
-//			while (y < 20)
-//				mlx_pixel_put(data->mlx, data->win, i, y++, 0x00FF0000);
-//			i++;
-//		}
-//	}
-//}
-
 void	ft_lstadd_front(t_img  **lst, t_img  *new)
 {
 	new->next = *lst;
@@ -241,8 +188,6 @@ t_img	*ft_fill_window(char **map, t_data *data)
 		i++;
 	}
 	return (head);
-	//mlx_put_image_to_window(data->mlx, data->win, data->background, 0, 0);
-	//mlx_put_image_to_window(data->mlx, data->win, data->fence, 64, 0);
 }
 
 char	*ft_map_read(int fd)
@@ -273,26 +218,16 @@ char	*ft_map_read(int fd)
 int	ft_key(int keycode, t_data *data)
 {
 	t_img	*tmp;
+	t_img	*old_pos;
 	int		i;
-	//int		n;
+	int 	movements;
 
 	i = 0;
+	movements = 0;
 	printf("Hello!\n");
 	printf("%d\n", keycode);
 	printf("%p\n", data->images);
 	tmp = data->images;
-	//while(tmp != NULL)
-	//{
-	//	printf("--->%d<---\n", i);
-	//	printf("%p\n", tmp);
-	//	printf("%p\n", tmp->mlx_img);
-	//	printf("%d\n", tmp->x);
-	//	printf("%d\n", tmp->y);
-	//	printf("%p\n\n", tmp->next);
-	//	tmp = tmp->next;
-	//	i++;
-	//	//printf("%p\n", tmp->next);
-	//}
 	if (keycode == 0)
 	{
 		while(tmp->mlx_img != data->dementor)
@@ -300,20 +235,21 @@ int	ft_key(int keycode, t_data *data)
 			tmp = tmp->next;
 			i++;
 		}
-		printf("%d\n", i);
-		mlx_put_image_to_window(data->mlx, data->win, data->background, tmp->x, tmp->y);
-		printf("%d\n", i);
-		tmp->mlx_img = data->background;
+		old_pos = tmp;
 		tmp = data->images;
-		printf("%d\n", i);
 		while(i > 1)
 		{
 			tmp = tmp->next;
 			i--;
 		}
-		printf("%d\n", i);
-		mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
-		tmp->mlx_img = data->dementor;
+		if (tmp->mlx_img != data->fence)
+		{
+			mlx_put_image_to_window(data->mlx, data->win, data->background, old_pos->x, old_pos->y);
+			old_pos->mlx_img = data->background;
+			mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
+			tmp->mlx_img = data->dementor;
+			movements++;
+		}
 	}
 	else if (keycode == 1)
 	{
@@ -321,15 +257,20 @@ int	ft_key(int keycode, t_data *data)
 		{
 			tmp = tmp->next;
 		}
-		mlx_put_image_to_window(data->mlx, data->win, data->background, tmp->x, tmp->y);
-		tmp->mlx_img = data->background;
+		old_pos = tmp;
 		while (i < (data->map_width / 64))
 		{
 			tmp = tmp->next;
 			i++;
 		}
-		mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
-		tmp->mlx_img = data->dementor;
+		if (tmp->mlx_img != data->fence)
+		{
+			mlx_put_image_to_window(data->mlx, data->win, data->background, old_pos->x, old_pos->y);
+			old_pos->mlx_img = data->background;
+			mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
+			tmp->mlx_img = data->dementor;
+			movements++;
+		}
 	}
 	else if (keycode == 2)
 	{
@@ -337,11 +278,16 @@ int	ft_key(int keycode, t_data *data)
 		{
 			tmp = tmp->next;
 		}
-		mlx_put_image_to_window(data->mlx, data->win, data->background, tmp->x, tmp->y);
-		tmp->mlx_img = data->background;
+		old_pos = tmp;
 		tmp = tmp->next;
-		mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
-		tmp->mlx_img = data->dementor;
+		if (tmp->mlx_img != data->fence)
+		{
+			mlx_put_image_to_window(data->mlx, data->win, data->background, old_pos->x, old_pos->y);
+			old_pos->mlx_img = data->background;
+			mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
+			tmp->mlx_img = data->dementor;
+			movements++;
+		}
 	}
 	else if (keycode == 13)
 	{
@@ -350,8 +296,7 @@ int	ft_key(int keycode, t_data *data)
 			tmp = tmp->next;
 			i++;
 		}
-		mlx_put_image_to_window(data->mlx, data->win, data->background, tmp->x, tmp->y);
-		tmp->mlx_img = data->background;
+		old_pos = tmp;
 		i = i - data->map_width / 64;
 		tmp = data->images;
 		while (i > 0)
@@ -359,24 +304,40 @@ int	ft_key(int keycode, t_data *data)
 			tmp = tmp->next;
 			i--;
 		}
-		mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
-		tmp->mlx_img = data->dementor;
+		if (tmp->mlx_img != data->fence)
+		{
+			mlx_put_image_to_window(data->mlx, data->win, data->background, old_pos->x, old_pos->y);
+			old_pos->mlx_img = data->background;
+			mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
+			tmp->mlx_img = data->dementor;
+			movements++;
+		}
 	}
-	//else if (keycode == 53)
-	//{
-
-	//}
-	return(0);
+	else if (keycode == 53)
+	{
+		mlx_destroy_image(data->mlx, data->background);
+		mlx_destroy_image(data->mlx, data->fence);
+		mlx_destroy_image(data->mlx, data->dementor);
+		mlx_destroy_image(data->mlx, data->harry);
+		mlx_destroy_image(data->mlx, data->exit);
+		mlx_destroy_window(data->mlx, data->win);
+		exit(1);
+	}
+	printf("%d\n", movements);
+	return (movements);
 }
 
 void	ft_parser(char	**argv, t_data *data)
 {
 	int		fd;
 	int		i;
+	int		n;
 	char	**map;
 	char	*line;
+	int		movements;
 
 	i = 0;
+	movements = 0;
 	map = (char **)malloc(10 * sizeof(char *));
 	if (!map)
 	{
@@ -392,8 +353,10 @@ void	ft_parser(char	**argv, t_data *data)
 	line = NULL;
 	data->images = ft_fill_window(map, data);
 	printf("%p\n", data->images);
-	mlx_key_hook(data->win, ft_key, data);
-
+	n = mlx_key_hook(data->win, ft_key, data);
+	movements = movements + n;
+	printf("%d\n", movements);
+	return;
 }
 
 void	ft_putstr_fd(char *s, int fd)
@@ -421,93 +384,7 @@ int main(int argc, char **argv)
 		ft_putstr_fd("Failed to set up the connection to the graphical system", 1);
 		return (1);
 	}
-	//data.img.addr = mlx_get_data_addr(data.img.mlx_img, &data.img.bpp, &data.img.line_len, &data.img.endian);
-	//while (i < 100)
-	//{
-	//	y = 0;
-	//	while (y < 100)
-	//	{
-	//		my_mlx_pixel_put(&img, i, y, 0x00FF0000);
-	//		y++;
-	//	}
-	//	i++;
-	//}
-	//my_mlx_pixel_put(&img, 5, 5, 0x00FF0000);
 	ft_parser(argv, &data);
 	mlx_loop(data.mlx);
+	return (0);
 }
-
-
-//int main()
-//{
-//	t_param	data;
-//	void	*img;
-//	char	*addr;
-//	int		n;
-//	int		img_width;
-//	int		img_height;
-//	int		bits_per_pixel;
-//	int		line_length;
-//	int		endian;
-
-//	//t_data	img;
-//	int		i;
-//	int		y;
-//	//char	*relative_path = "/Users/ayajirob/Downloads/abstract-clouds.xpm";
-
-//	i = 0;
-//	y = 0;
-//	data.mlx = mlx_init();
-//	if (!data.mlx)
-//	{
-//		ft_putstr_fd("Failed to set up the connection to the graphical system", 1);
-//		return(1);
-//	}
-//	data.win = mlx_new_window(data.mlx, 1920, 1080, "fdf");
-//	if (!data.win)
-//	{
-//		ft_putstr_fd("Failed to open a new window", 1);
-//		return(1);
-//	}
-//	img = mlx_new_image(data.mlx, 1280, 720);
-//	if (!img)
-//	{
-//		ft_putstr_fd("Failed to make an image", 1);
-//		return(1);
-//	}
-//	//addr = mlx_get_data_addr(img, &bits_per_pixel, &line_length, &endian);
-//	while (i < 100 && y < 100)
-//	{
-//		mlx_pixel_put(data.mlx, data.win, i, y, 0x00FF0000);
-//		i++;
-//		y++;
-//	}
-//	mlx_key_hook(data.win, ft_key, &data);
-//	//my_mlx_pixel_put(&img, 5, 5, 0x00FF0000);
-//	//n = mlx_put_image_to_window(mlx, win_ptr, img, 1, 1);
-//	//img_ptr = mlx_xpm_file_to_image(ptr_to_connection, relative_path, &img_width, &img_height);
-//	//printf("%p\n", img_ptr);
-//	mlx_loop(data.mlx);
-//}
-
-//int	main(void)
-//{
-//	void	*mlx;
-//	void	*win;
-//	void	*img;
-//	void	*n_img;
-//	char	*filename = "dobby.xpm";
-//	char	*filename2 = "abstract-clouds.xpm";
-//	int		img_width;
-//	int		img_height;
-
-//	img_height = 0;
-//	img_width = 0;
-//	mlx = mlx_init();
-//	win = mlx_new_window(mlx, 1920, 1080, "fdf");
-//	//img = mlx_new_image(mlx, 1280, 720);
-//	n_img = mlx_xpm_file_to_image(mlx, filename, &img_height, &img_width);
-//	mlx_put_image_to_window(mlx, win, n_img, 0, 0);
-//	//img = mlx_png_file_to_image(mlx, filename, img_width, img_height);
-//	mlx_loop(mlx);
-//}
