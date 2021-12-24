@@ -37,6 +37,7 @@ typedef struct	s_data{
 	int		img_width3;
 	int		img_width4;
 	int		img_width5;
+	int		map_width;
 	t_img	*images;
 }				t_data;
 
@@ -160,8 +161,8 @@ t_img	*ft_fill_window(char **map, t_data *data)
 	while (map[i] != NULL)
 		i++;
 	height = i * 64;
-	width = ft_strlen(map[0]) * 64;
-	data->win = mlx_new_window(data->mlx, width, height, "fdf");
+	data->map_width = ft_strlen(map[0]) * 64;
+	data->win = mlx_new_window(data->mlx, data->map_width, height, "fdf");
 	if (!data->win)
 	{
 		perror("Failed to open a new window");
@@ -273,54 +274,93 @@ int	ft_key(int keycode, t_data *data)
 {
 	t_img	*tmp;
 	int		i;
+	//int		n;
 
 	i = 0;
 	printf("Hello!\n");
 	printf("%d\n", keycode);
 	printf("%p\n", data->images);
 	tmp = data->images;
-	while(tmp != NULL)
-	{
-		printf("--->%d<---\n", i);
-		printf("%p\n", tmp);
-		printf("%p\n", tmp->mlx_img);
-		printf("%d\n", tmp->x);
-		printf("%d\n", tmp->y);
-		printf("%p\n\n", tmp->next);
-		tmp = tmp->next;
-		i++;
-		//printf("%p\n", tmp->next);
-	}
+	//while(tmp != NULL)
+	//{
+	//	printf("--->%d<---\n", i);
+	//	printf("%p\n", tmp);
+	//	printf("%p\n", tmp->mlx_img);
+	//	printf("%d\n", tmp->x);
+	//	printf("%d\n", tmp->y);
+	//	printf("%p\n\n", tmp->next);
+	//	tmp = tmp->next;
+	//	i++;
+	//	//printf("%p\n", tmp->next);
+	//}
 	if (keycode == 0)
 	{
-		mlx_put_image_to_window(data->mlx, data->win, data->harry, 60, 200);
+		while(tmp->mlx_img != data->dementor)
+		{
+			tmp = tmp->next;
+			i++;
+		}
+		printf("%d\n", i);
+		mlx_put_image_to_window(data->mlx, data->win, data->background, tmp->x, tmp->y);
+		printf("%d\n", i);
+		tmp->mlx_img = data->background;
+		tmp = data->images;
+		printf("%d\n", i);
+		while(i > 1)
+		{
+			tmp = tmp->next;
+			i--;
+		}
+		printf("%d\n", i);
+		mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
+		tmp->mlx_img = data->dementor;
 	}
 	else if (keycode == 1)
 	{
 		while(tmp->mlx_img != data->dementor)
 		{
-			printf("%p\n", tmp->mlx_img);
-			printf("%p\n", data->dementor);
-			printf("%p\n", tmp->next);
 			tmp = tmp->next;
-			printf("%p\n", tmp->mlx_img);
-			//printf("%p\n", tmp->next);
-			i++;
 		}
 		mlx_put_image_to_window(data->mlx, data->win, data->background, tmp->x, tmp->y);
 		tmp->mlx_img = data->background;
-		tmp = data->images;
-		tmp = tmp + i - 1;
+		while (i < (data->map_width / 64))
+		{
+			tmp = tmp->next;
+			i++;
+		}
 		mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
 		tmp->mlx_img = data->dementor;
 	}
 	else if (keycode == 2)
 	{
-		mlx_put_image_to_window(data->mlx, data->win, data->harry, 340, 200);
+		while(tmp->mlx_img != data->dementor)
+		{
+			tmp = tmp->next;
+		}
+		mlx_put_image_to_window(data->mlx, data->win, data->background, tmp->x, tmp->y);
+		tmp->mlx_img = data->background;
+		tmp = tmp->next;
+		mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
+		tmp->mlx_img = data->dementor;
 	}
 	else if (keycode == 13)
 	{
-		mlx_put_image_to_window(data->mlx, data->win, data->harry, 200, 60);
+		while(tmp->mlx_img != data->dementor)
+		{
+			tmp = tmp->next;
+			i++;
+		}
+		mlx_put_image_to_window(data->mlx, data->win, data->background, tmp->x, tmp->y);
+		tmp->mlx_img = data->background;
+		i = i - data->map_width / 64;
+		tmp = data->images;
+		while (i > 0)
+		{
+			tmp = tmp->next;
+			i--;
+		}
+		mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
+		tmp->mlx_img = data->dementor;
 	}
 	//else if (keycode == 53)
 	//{
