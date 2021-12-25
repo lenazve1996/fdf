@@ -242,13 +242,27 @@ int	ft_key(int keycode, t_data *data)
 			tmp = tmp->next;
 			i--;
 		}
-		if (tmp->mlx_img != data->fence)
+		if (tmp->mlx_img != data->fence && old_pos->mlx_img != data->exit)
 		{
 			mlx_put_image_to_window(data->mlx, data->win, data->background, old_pos->x, old_pos->y);
 			old_pos->mlx_img = data->background;
 			mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
 			tmp->mlx_img = data->dementor;
 			movements++;
+		}
+		else if (old_pos->mlx_img == data->exit)
+		{
+			tmp = data->images;
+			while (tmp->next != NULL)
+			{
+				if (tmp->mlx_img != data->harry)
+					tmp = tmp->next;
+			}
+			if (tmp->next == NULL)
+			{
+				mlx_destroy_window(data->mlx, data->win);
+				exit(1);
+			}
 		}
 	}
 	else if (keycode == 1)
@@ -263,13 +277,27 @@ int	ft_key(int keycode, t_data *data)
 			tmp = tmp->next;
 			i++;
 		}
-		if (tmp->mlx_img != data->fence)
+		if (tmp->mlx_img != data->fence && old_pos->mlx_img != data->exit)
 		{
 			mlx_put_image_to_window(data->mlx, data->win, data->background, old_pos->x, old_pos->y);
 			old_pos->mlx_img = data->background;
 			mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
 			tmp->mlx_img = data->dementor;
 			movements++;
+		}
+		else if (old_pos->mlx_img == data->exit)
+		{
+			tmp = data->images;
+			while (tmp->next != NULL)
+			{
+				if (tmp->mlx_img != data->harry)
+					tmp = tmp->next;
+			}
+			if (tmp->next == NULL)
+			{
+				mlx_destroy_window(data->mlx, data->win);
+				exit(1);
+			}
 		}
 	}
 	else if (keycode == 2)
@@ -280,13 +308,27 @@ int	ft_key(int keycode, t_data *data)
 		}
 		old_pos = tmp;
 		tmp = tmp->next;
-		if (tmp->mlx_img != data->fence)
+		if (tmp->mlx_img != data->fence && old_pos->mlx_img != data->exit)
 		{
 			mlx_put_image_to_window(data->mlx, data->win, data->background, old_pos->x, old_pos->y);
 			old_pos->mlx_img = data->background;
 			mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
 			tmp->mlx_img = data->dementor;
 			movements++;
+		}
+		else if (old_pos->mlx_img == data->exit)
+		{
+			tmp = data->images;
+			while (tmp->next != NULL)
+			{
+				if (tmp->mlx_img != data->harry)
+					tmp = tmp->next;
+			}
+			if (tmp->next == NULL)
+			{
+				mlx_destroy_window(data->mlx, data->win);
+				exit(1);
+			}
 		}
 	}
 	else if (keycode == 13)
@@ -304,13 +346,33 @@ int	ft_key(int keycode, t_data *data)
 			tmp = tmp->next;
 			i--;
 		}
-		if (tmp->mlx_img != data->fence)
+		if (tmp->mlx_img != data->fence && old_pos->mlx_img != data->exit)
 		{
+			i = i - data->map_width / 64;
+			while (i > 0)
+			{
+				tmp = tmp->next;
+				i--;
+			}
 			mlx_put_image_to_window(data->mlx, data->win, data->background, old_pos->x, old_pos->y);
 			old_pos->mlx_img = data->background;
 			mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
 			tmp->mlx_img = data->dementor;
 			movements++;
+		}
+		else if (old_pos->mlx_img == data->exit)
+		{
+			tmp = data->images;
+			while (tmp->next != NULL)
+			{
+				if (tmp->mlx_img != data->harry)
+					tmp = tmp->next;
+			}
+			if (tmp->next == NULL)
+			{
+				mlx_destroy_window(data->mlx, data->win);
+				exit(1);
+			}
 		}
 	}
 	else if (keycode == 53)
