@@ -20,13 +20,14 @@ typedef struct	s_data{
 	void	*background;
 	void	*fence;
 	void	*harry;
-	void	*exit;
+	void	*ex;
 	void	*dementor;
 	char	*filename;
 	char	*filename2;
 	char	*filename3;
 	char	*filename4;
 	char	*filename5;
+	int		movements;
 	int		img_height;
 	int		img_height2;
 	int		img_height3;
@@ -38,6 +39,7 @@ typedef struct	s_data{
 	int		img_width4;
 	int		img_width5;
 	int		map_width;
+	int		map_height;
 	t_img	*images;
 }				t_data;
 
@@ -45,6 +47,11 @@ void	ft_lstadd_front(t_img  **lst, t_img  *new)
 {
 	new->next = *lst;
 	*lst = new;
+}
+
+void	ft_putstr_fd(char *s, int fd)
+{
+	write(fd, s, ft_strlen(s));
 }
 
 t_img	*ft_lstlast(t_img *lst)
@@ -85,12 +92,25 @@ void	ft_lstadd_back(t_img **lst, t_img *new)
 	}
 }
 
+char	*ft_strchr(const char *s, int c)
+{
+	while (*s)
+	{
+		if (*s == (char)c)
+			return ((char *)s);
+		s++;
+	}
+	if (c == '\0')
+		return ((char *)s);
+	return (NULL);
+}
+
 t_img	*ft_fill_window(char **map, t_data *data)
 {
 	t_img	*head;
 	t_img	*new_elem;
-	int 	width;
-	int 	height;
+	int		height;
+	int		width;
 	int		img_height;
 	int		img_height2;
 	int		img_width;
@@ -99,17 +119,13 @@ t_img	*ft_fill_window(char **map, t_data *data)
 	int		y;
 	int		str;
 	int		c;
-	int		i;
 	int		flag;
 
 	str = 0;
 	c = 0;
-	i = 0;
-	while (map[i] != NULL)
-		i++;
-	height = i * 64;
-	data->map_width = ft_strlen(map[0]) * 64;
-	data->win = mlx_new_window(data->mlx, data->map_width, height, "fdf");
+	height = data->map_height * 64;
+	width = data->map_width * 64;
+	data->win = mlx_new_window(data->mlx, width, height, "fdf");
 	if (!data->win)
 	{
 		perror("Failed to open a new window");
@@ -118,7 +134,7 @@ t_img	*ft_fill_window(char **map, t_data *data)
 	data->background = mlx_xpm_file_to_image(data->mlx, data->filename2, &data->img_height, &data->img_width);
 	data->fence = mlx_xpm_file_to_image(data->mlx, data->filename, &data->img_height2, &data->img_width2);
 	data->harry = mlx_xpm_file_to_image(data->mlx, data->filename3, &data->img_height3, &data->img_width3);
-	data->exit = mlx_xpm_file_to_image(data->mlx, data->filename4, &data->img_height4, &data->img_width4);
+	data->ex = mlx_xpm_file_to_image(data->mlx, data->filename4, &data->img_height4, &data->img_width4);
 	data->dementor = mlx_xpm_file_to_image(data->mlx, data->filename5, &data->img_height5, &data->img_width5);
 	flag = -1;
 	while (map[str] != NULL)
@@ -156,8 +172,8 @@ t_img	*ft_fill_window(char **map, t_data *data)
 			else if (map[str][c] == 'E')
 			{
 				mlx_put_image_to_window(data->mlx, data->win, data->background, c * 64, str * 64);
-				mlx_put_image_to_window(data->mlx, data->win, data->exit, c * 64, str * 64);
-				new_elem = ft_lstnew(data->exit, c * 64, str * 64);
+				mlx_put_image_to_window(data->mlx, data->win, data->ex, c * 64, str * 64);
+				new_elem = ft_lstnew(data->ex, c * 64, str * 64);
 				ft_lstadd_back(&head, new_elem);
 			}
 			else if (map[str][c] == 'C')
@@ -167,26 +183,23 @@ t_img	*ft_fill_window(char **map, t_data *data)
 				new_elem = ft_lstnew(data->harry, c * 64, str * 64);
 				ft_lstadd_back(&head, new_elem);
 			}
-			printf("%c\n", map[str][c]);
-			printf("%d\n", str * 64);
-			printf("%d\n", c * 64);
 			c++;
 		}
 		str++;
 	}
-	new_elem = head;
-	i = 0;
-	while(new_elem != NULL)
-	{
-		printf("--->%d<---\n", i);
-		printf("%p\n", new_elem);
-		printf("%p\n", new_elem->mlx_img);
-		printf("%d\n", new_elem->x);
-		printf("%d\n", new_elem->y);
-		printf("%p\n\n", new_elem->next);
-		new_elem = new_elem->next;
-		i++;
-	}
+	//new_elem = head;
+	//i = 0;
+	//while(new_elem != NULL)
+	//{
+	//	printf("--->%d<---\n", i);
+	//	printf("%p\n", new_elem);
+	//	printf("%p\n", new_elem->mlx_img);
+	//	printf("%d\n", new_elem->x);
+	//	printf("%d\n", new_elem->y);
+	//	printf("%p\n\n", new_elem->next);
+	//	new_elem = new_elem->next;
+	//	i++;
+	//}
 	return (head);
 }
 
@@ -211,7 +224,6 @@ char	*ft_map_read(int fd)
 	}
 	free(tmp);
 	tmp = NULL;
-	printf("%s\n", line);
 	return (line);
 }
 
@@ -224,9 +236,7 @@ int	ft_key(int keycode, t_data *data)
 
 	i = 0;
 	movements = 0;
-	printf("Hello!\n");
 	printf("%d\n", keycode);
-	printf("%p\n", data->images);
 	tmp = data->images;
 	if (keycode == 0)
 	{
@@ -242,7 +252,7 @@ int	ft_key(int keycode, t_data *data)
 			tmp = tmp->next;
 			i--;
 		}
-		if (tmp->mlx_img != data->fence && old_pos->mlx_img != data->exit)
+		if (tmp->mlx_img != data->fence && tmp->mlx_img != data->ex)
 		{
 			mlx_put_image_to_window(data->mlx, data->win, data->background, old_pos->x, old_pos->y);
 			old_pos->mlx_img = data->background;
@@ -250,10 +260,10 @@ int	ft_key(int keycode, t_data *data)
 			tmp->mlx_img = data->dementor;
 			movements++;
 		}
-		else if (old_pos->mlx_img == data->exit)
+		else if (tmp->mlx_img == data->ex)
 		{
 			tmp = data->images;
-			while (tmp->next != NULL)
+			while (tmp->next != NULL && tmp->mlx_img != data->harry)
 			{
 				if (tmp->mlx_img != data->harry)
 					tmp = tmp->next;
@@ -264,6 +274,7 @@ int	ft_key(int keycode, t_data *data)
 				exit(1);
 			}
 		}
+		printf("%d\n", ++data->movements);
 	}
 	else if (keycode == 1)
 	{
@@ -272,23 +283,22 @@ int	ft_key(int keycode, t_data *data)
 			tmp = tmp->next;
 		}
 		old_pos = tmp;
-		while (i < (data->map_width / 64))
+		while (i < (data->map_width))
 		{
 			tmp = tmp->next;
 			i++;
 		}
-		if (tmp->mlx_img != data->fence && old_pos->mlx_img != data->exit)
+		if (tmp->mlx_img != data->fence && tmp->mlx_img != data->ex)
 		{
 			mlx_put_image_to_window(data->mlx, data->win, data->background, old_pos->x, old_pos->y);
 			old_pos->mlx_img = data->background;
 			mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
 			tmp->mlx_img = data->dementor;
-			movements++;
 		}
-		else if (old_pos->mlx_img == data->exit)
+		else if (tmp->mlx_img == data->ex)
 		{
 			tmp = data->images;
-			while (tmp->next != NULL)
+			while (tmp->next != NULL && tmp->mlx_img != data->harry)
 			{
 				if (tmp->mlx_img != data->harry)
 					tmp = tmp->next;
@@ -299,6 +309,7 @@ int	ft_key(int keycode, t_data *data)
 				exit(1);
 			}
 		}
+		printf("%d\n", ++data->movements);
 	}
 	else if (keycode == 2)
 	{
@@ -308,7 +319,7 @@ int	ft_key(int keycode, t_data *data)
 		}
 		old_pos = tmp;
 		tmp = tmp->next;
-		if (tmp->mlx_img != data->fence && old_pos->mlx_img != data->exit)
+		if (tmp->mlx_img != data->fence && tmp->mlx_img != data->ex)
 		{
 			mlx_put_image_to_window(data->mlx, data->win, data->background, old_pos->x, old_pos->y);
 			old_pos->mlx_img = data->background;
@@ -316,10 +327,10 @@ int	ft_key(int keycode, t_data *data)
 			tmp->mlx_img = data->dementor;
 			movements++;
 		}
-		else if (old_pos->mlx_img == data->exit)
+		else if (tmp->mlx_img == data->ex)
 		{
 			tmp = data->images;
-			while (tmp->next != NULL)
+			while (tmp->next != NULL && tmp->mlx_img != data->harry)
 			{
 				if (tmp->mlx_img != data->harry)
 					tmp = tmp->next;
@@ -330,6 +341,7 @@ int	ft_key(int keycode, t_data *data)
 				exit(1);
 			}
 		}
+		printf("%d\n", ++data->movements);
 	}
 	else if (keycode == 13)
 	{
@@ -339,16 +351,16 @@ int	ft_key(int keycode, t_data *data)
 			i++;
 		}
 		old_pos = tmp;
-		i = i - data->map_width / 64;
+		i = i - data->map_width;
 		tmp = data->images;
 		while (i > 0)
 		{
 			tmp = tmp->next;
 			i--;
 		}
-		if (tmp->mlx_img != data->fence && old_pos->mlx_img != data->exit)
+		if (tmp->mlx_img != data->fence && tmp->mlx_img != data->ex)
 		{
-			i = i - data->map_width / 64;
+			i = i - data->map_width;
 			while (i > 0)
 			{
 				tmp = tmp->next;
@@ -359,11 +371,12 @@ int	ft_key(int keycode, t_data *data)
 			mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
 			tmp->mlx_img = data->dementor;
 			movements++;
+			write(1, &movements, 1);
 		}
-		else if (old_pos->mlx_img == data->exit)
+		else if (tmp->mlx_img == data->ex)
 		{
 			tmp = data->images;
-			while (tmp->next != NULL)
+			while (tmp->next != NULL && tmp->mlx_img != data->harry)
 			{
 				if (tmp->mlx_img != data->harry)
 					tmp = tmp->next;
@@ -374,6 +387,7 @@ int	ft_key(int keycode, t_data *data)
 				exit(1);
 			}
 		}
+		printf("%d\n", ++data->movements);
 	}
 	else if (keycode == 53)
 	{
@@ -381,12 +395,67 @@ int	ft_key(int keycode, t_data *data)
 		mlx_destroy_image(data->mlx, data->fence);
 		mlx_destroy_image(data->mlx, data->dementor);
 		mlx_destroy_image(data->mlx, data->harry);
-		mlx_destroy_image(data->mlx, data->exit);
+		mlx_destroy_image(data->mlx, data->ex);
 		mlx_destroy_window(data->mlx, data->win);
 		exit(1);
 	}
-	printf("%d\n", movements);
-	return (movements);
+	return (0);
+}
+
+void	ft_map_validation(char	**map, t_data *data)
+{
+	int	i;
+	int	j;
+	int	collectible;
+	int	dementor;
+	int	ex;
+
+	i = 0;
+	j = 0;
+	collectible = 0;
+	dementor = 0;
+	ex = 0;
+	while (map[i] != NULL)
+		i++;
+	data->map_height = i;
+	data->map_width = ft_strlen(map[0]);
+	while (map[0][j] != '\0' && map[data->map_height - 1][j] != '\0')
+	{
+		if (map[0][j] == '1' && map[data->map_height - 1][j] == '1')
+			j++;
+		else
+		{
+			ft_putstr_fd("1Error\nThe map is not valid: the map must be closed/surrounded by walls", 2);
+			exit(EXIT_FAILURE);
+		}
+	}
+	i = 0;
+	while (i < data->map_height)
+	{
+		if (map[i][0] == '1' && map[i][data->map_width - 1] == '1')
+			i++;
+		else
+		{
+			ft_putstr_fd("2Error\nThe map is not valid: the map must be closed/surrounded by walls", 2);
+			exit(EXIT_FAILURE);
+		}
+	}
+	i = 0;
+	while (i < data->map_height)
+	{
+		if (ft_strchr(map[i], 'C') != NULL)
+			collectible++;
+		if (ft_strchr(map[i], 'P') != NULL)
+			dementor++;
+		if (ft_strchr(map[i], 'E') != NULL)
+			ex++;
+		i++;
+	}
+	if ((collectible == 0) || (dementor == 0) || (ex == 0))
+	{
+		ft_putstr_fd("Error\nThe map is not valid: map must have at least one exit, one collectible, and one starting position", 2);
+		exit(EXIT_FAILURE);
+	}
 }
 
 void	ft_parser(char	**argv, t_data *data)
@@ -396,10 +465,9 @@ void	ft_parser(char	**argv, t_data *data)
 	int		n;
 	char	**map;
 	char	*line;
-	int		movements;
 
 	i = 0;
-	movements = 0;
+	data->movements = 0;
 	map = (char **)malloc(10 * sizeof(char *));
 	if (!map)
 	{
@@ -413,17 +481,10 @@ void	ft_parser(char	**argv, t_data *data)
 	map = ft_split(line, '\n');
 	free(line);
 	line = NULL;
+	ft_map_validation(map, data);
 	data->images = ft_fill_window(map, data);
-	printf("%p\n", data->images);
 	n = mlx_key_hook(data->win, ft_key, data);
-	movements = movements + n;
-	printf("%d\n", movements);
 	return;
-}
-
-void	ft_putstr_fd(char *s, int fd)
-{
-	write(fd, s, ft_strlen(s));
 }
 
 int main(int argc, char **argv)
