@@ -458,6 +458,7 @@ void	ft_map_validation(char	**map, t_data *data)
 	}
 }
 
+
 void	ft_parser(char	**argv, t_data *data)
 {
 	int		fd;
