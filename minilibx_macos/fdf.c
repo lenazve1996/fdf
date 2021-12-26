@@ -8,6 +8,7 @@
 typedef struct	s_img
 {
 	void	*mlx_img;
+	int		return_exit;
 	int		x;
 	int		y;
 	void	*next;
@@ -22,22 +23,27 @@ typedef struct	s_data{
 	void	*harry;
 	void	*ex;
 	void	*dementor;
+	void	*enemy;
 	char	*filename;
 	char	*filename2;
 	char	*filename3;
 	char	*filename4;
 	char	*filename5;
+	char	*filename6;
+	//char	*moves;
 	int		movements;
 	int		img_height;
 	int		img_height2;
 	int		img_height3;
 	int		img_height4;
 	int		img_height5;
+	int		img_height6;
 	int		img_width;
 	int		img_width2;
 	int		img_width3;
 	int		img_width4;
 	int		img_width5;
+	int		img_width6;
 	int		map_width;
 	int		map_height;
 	t_img	*images;
@@ -136,6 +142,7 @@ t_img	*ft_fill_window(char **map, t_data *data)
 	data->harry = mlx_xpm_file_to_image(data->mlx, data->filename3, &data->img_height3, &data->img_width3);
 	data->ex = mlx_xpm_file_to_image(data->mlx, data->filename4, &data->img_height4, &data->img_width4);
 	data->dementor = mlx_xpm_file_to_image(data->mlx, data->filename5, &data->img_height5, &data->img_width5);
+	data->enemy = mlx_xpm_file_to_image(data->mlx, data->filename6, &data->img_height6, &data->img_width6);
 	flag = -1;
 	while (map[str] != NULL)
 	{
@@ -183,10 +190,18 @@ t_img	*ft_fill_window(char **map, t_data *data)
 				new_elem = ft_lstnew(data->harry, c * 64, str * 64);
 				ft_lstadd_back(&head, new_elem);
 			}
+			else if (map[str][c] == 'N')
+			{
+				mlx_put_image_to_window(data->mlx, data->win, data->background, c * 64, str * 64);
+				mlx_put_image_to_window(data->mlx, data->win, data->enemy, c * 64, str * 64);
+				new_elem = ft_lstnew(data->enemy, c * 64, str * 64);
+				ft_lstadd_back(&head, new_elem);
+			}
 			c++;
 		}
 		str++;
 	}
+	mlx_string_put(data->mlx, data->win, 24, 24, 0x00FF0000, ft_itoa(data->movements));
 	//new_elem = head;
 	//i = 0;
 	//while(new_elem != NULL)
@@ -232,10 +247,8 @@ int	ft_key(int keycode, t_data *data)
 	t_img	*tmp;
 	t_img	*old_pos;
 	int		i;
-	int 	movements;
 
 	i = 0;
-	movements = 0;
 	printf("%d\n", keycode);
 	tmp = data->images;
 	if (keycode == 0)
@@ -252,16 +265,36 @@ int	ft_key(int keycode, t_data *data)
 			tmp = tmp->next;
 			i--;
 		}
-		if (tmp->mlx_img != data->fence && tmp->mlx_img != data->ex)
+		if (tmp->mlx_img != data->fence && tmp->mlx_img != data->ex && tmp->mlx_img != data->enemy)
 		{
 			mlx_put_image_to_window(data->mlx, data->win, data->background, old_pos->x, old_pos->y);
 			old_pos->mlx_img = data->background;
+			if (data->images->return_exit == 1)
+			{
+				mlx_put_image_to_window(data->mlx, data->win, data->ex, old_pos->x, old_pos->y);
+				old_pos->mlx_img = data->ex;
+				data->images->return_exit = 0;
+			}
+			if (tmp->mlx_img == data->harry)
+				mlx_put_image_to_window(data->mlx, data->win, data->background, tmp->x, tmp->y);
 			mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
 			tmp->mlx_img = data->dementor;
-			movements++;
+			++data->movements;
 		}
-		else if (tmp->mlx_img == data->ex)
+		else if (tmp->mlx_img == data->ex || tmp->mlx_img == data->enemy)
 		{
+			mlx_put_image_to_window(data->mlx, data->win, data->background, old_pos->x, old_pos->y);
+			old_pos->mlx_img = data->background;
+			if (tmp->mlx_img == data->enemy)
+			{
+				mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
+				tmp->mlx_img = data->dementor;
+				mlx_destroy_window(data->mlx, data->win);
+				exit(1);
+			}
+			mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
+			tmp->mlx_img = data->dementor;
+			data->images->return_exit = 1;
 			tmp = data->images;
 			while (tmp->next != NULL && tmp->mlx_img != data->harry)
 			{
@@ -273,8 +306,11 @@ int	ft_key(int keycode, t_data *data)
 				mlx_destroy_window(data->mlx, data->win);
 				exit(1);
 			}
+			++data->movements;
 		}
-		printf("%d\n", ++data->movements);
+		printf("%d\n", data->movements);
+		mlx_put_image_to_window(data->mlx, data->win, data->fence, 0, 0);
+		mlx_string_put(data->mlx, data->win, 24, 24, 0x00FF0000, ft_itoa(data->movements));
 	}
 	else if (keycode == 1)
 	{
@@ -288,15 +324,36 @@ int	ft_key(int keycode, t_data *data)
 			tmp = tmp->next;
 			i++;
 		}
-		if (tmp->mlx_img != data->fence && tmp->mlx_img != data->ex)
+		if (tmp->mlx_img != data->fence && tmp->mlx_img != data->ex && tmp->mlx_img != data->enemy)
 		{
 			mlx_put_image_to_window(data->mlx, data->win, data->background, old_pos->x, old_pos->y);
 			old_pos->mlx_img = data->background;
+			if (data->images->return_exit == 1)
+			{
+				mlx_put_image_to_window(data->mlx, data->win, data->ex, old_pos->x, old_pos->y);
+				old_pos->mlx_img = data->ex;
+				data->images->return_exit = 0;
+			}
+			if (tmp->mlx_img == data->harry)
+				mlx_put_image_to_window(data->mlx, data->win, data->background, tmp->x, tmp->y);
 			mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
 			tmp->mlx_img = data->dementor;
+			++data->movements;
 		}
-		else if (tmp->mlx_img == data->ex)
+		else if (tmp->mlx_img == data->ex || tmp->mlx_img == data->enemy)
 		{
+			mlx_put_image_to_window(data->mlx, data->win, data->background, old_pos->x, old_pos->y);
+			old_pos->mlx_img = data->background;
+			if (tmp->mlx_img == data->enemy)
+			{
+				mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
+				tmp->mlx_img = data->dementor;
+				mlx_destroy_window(data->mlx, data->win);
+				exit(1);
+			}
+			mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
+			tmp->mlx_img = data->dementor;
+			data->images->return_exit = 1;
 			tmp = data->images;
 			while (tmp->next != NULL && tmp->mlx_img != data->harry)
 			{
@@ -306,10 +363,13 @@ int	ft_key(int keycode, t_data *data)
 			if (tmp->next == NULL)
 			{
 				mlx_destroy_window(data->mlx, data->win);
-				exit(1);
+				exit(0);
 			}
+			++data->movements;
 		}
-		printf("%d\n", ++data->movements);
+		printf("%d\n", data->movements);
+		mlx_put_image_to_window(data->mlx, data->win, data->fence, 0, 0);
+		mlx_string_put(data->mlx, data->win, 24, 24, 0x00FF0000, ft_itoa(data->movements));
 	}
 	else if (keycode == 2)
 	{
@@ -319,16 +379,36 @@ int	ft_key(int keycode, t_data *data)
 		}
 		old_pos = tmp;
 		tmp = tmp->next;
-		if (tmp->mlx_img != data->fence && tmp->mlx_img != data->ex)
+		if (tmp->mlx_img != data->fence && tmp->mlx_img != data->ex && tmp->mlx_img != data->enemy)
 		{
 			mlx_put_image_to_window(data->mlx, data->win, data->background, old_pos->x, old_pos->y);
 			old_pos->mlx_img = data->background;
+			if (data->images->return_exit == 1)
+			{
+				mlx_put_image_to_window(data->mlx, data->win, data->ex, old_pos->x, old_pos->y);
+				old_pos->mlx_img = data->ex;
+				data->images->return_exit = 0;
+			}
+			if (tmp->mlx_img == data->harry)
+				mlx_put_image_to_window(data->mlx, data->win, data->background, tmp->x, tmp->y);
 			mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
 			tmp->mlx_img = data->dementor;
-			movements++;
+			++data->movements;
 		}
-		else if (tmp->mlx_img == data->ex)
+		else if (tmp->mlx_img == data->ex || tmp->mlx_img == data->enemy)
 		{
+			mlx_put_image_to_window(data->mlx, data->win, data->background, old_pos->x, old_pos->y);
+			old_pos->mlx_img = data->background;
+			if (tmp->mlx_img == data->enemy)
+			{
+				mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
+				tmp->mlx_img = data->dementor;
+				mlx_destroy_window(data->mlx, data->win);
+				exit(1);
+			}
+			mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
+			tmp->mlx_img = data->dementor;
+			data->images->return_exit = 1;
 			tmp = data->images;
 			while (tmp->next != NULL && tmp->mlx_img != data->harry)
 			{
@@ -340,8 +420,11 @@ int	ft_key(int keycode, t_data *data)
 				mlx_destroy_window(data->mlx, data->win);
 				exit(1);
 			}
+			++data->movements;
 		}
-		printf("%d\n", ++data->movements);
+		printf("%d\n", data->movements);
+		mlx_put_image_to_window(data->mlx, data->win, data->fence, 0, 0);
+		mlx_string_put(data->mlx, data->win, 24, 24, 0x00FF0000, ft_itoa(data->movements));
 	}
 	else if (keycode == 13)
 	{
@@ -358,7 +441,7 @@ int	ft_key(int keycode, t_data *data)
 			tmp = tmp->next;
 			i--;
 		}
-		if (tmp->mlx_img != data->fence && tmp->mlx_img != data->ex)
+		if (tmp->mlx_img != data->fence && tmp->mlx_img != data->ex && tmp->mlx_img != data->enemy)
 		{
 			i = i - data->map_width;
 			while (i > 0)
@@ -368,13 +451,32 @@ int	ft_key(int keycode, t_data *data)
 			}
 			mlx_put_image_to_window(data->mlx, data->win, data->background, old_pos->x, old_pos->y);
 			old_pos->mlx_img = data->background;
+			if (data->images->return_exit == 1)
+			{
+				mlx_put_image_to_window(data->mlx, data->win, data->ex, old_pos->x, old_pos->y);
+				old_pos->mlx_img = data->ex;
+				data->images->return_exit = 0;
+			}
+			if (tmp->mlx_img == data->harry)
+				mlx_put_image_to_window(data->mlx, data->win, data->background, tmp->x, tmp->y);
 			mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
 			tmp->mlx_img = data->dementor;
-			movements++;
-			write(1, &movements, 1);
+			++data->movements;
 		}
-		else if (tmp->mlx_img == data->ex)
+		else if (tmp->mlx_img == data->ex || tmp->mlx_img == data->enemy)
 		{
+			mlx_put_image_to_window(data->mlx, data->win, data->background, old_pos->x, old_pos->y);
+			old_pos->mlx_img = data->background;
+			if (tmp->mlx_img == data->enemy)
+			{
+				mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
+				tmp->mlx_img = data->dementor;
+				mlx_destroy_window(data->mlx, data->win);
+				exit(1);
+			}
+			mlx_put_image_to_window(data->mlx, data->win, data->dementor, tmp->x, tmp->y);
+			tmp->mlx_img = data->dementor;
+			data->images->return_exit = 1;
 			tmp = data->images;
 			while (tmp->next != NULL && tmp->mlx_img != data->harry)
 			{
@@ -386,8 +488,11 @@ int	ft_key(int keycode, t_data *data)
 				mlx_destroy_window(data->mlx, data->win);
 				exit(1);
 			}
+			++data->movements;
 		}
-		printf("%d\n", ++data->movements);
+		printf("%d\n", data->movements);
+		mlx_put_image_to_window(data->mlx, data->win, data->fence, 0, 0);
+		mlx_string_put(data->mlx, data->win, 24, 24, 0x00FF0000, ft_itoa(data->movements));
 	}
 	else if (keycode == 53)
 	{
@@ -419,27 +524,6 @@ void	ft_map_validation(char	**map, t_data *data)
 		i++;
 	data->map_height = i;
 	data->map_width = ft_strlen(map[0]);
-	//while (map[0][j] != '\0' && map[data->map_height - 1][j] != '\0')
-	//{
-	//	if (map[0][j] == '1' && map[data->map_height - 1][j] == '1')
-	//		j++;
-	//	else
-	//	{
-	//		ft_putstr_fd("1Error\nThe map is not valid: the map must be closed/surrounded by walls", 2);
-	//		exit(EXIT_FAILURE);
-	//	}
-	//}
-	//i = 0;
-	//while (i < data->map_height)
-	//{
-	//	if (map[i][0] == '1' && map[i][data->map_width - 1] == '1')
-	//		i++;
-	//	else
-	//	{
-	//		ft_putstr_fd("2Error\nThe map is not valid: the map must be closed/surrounded by walls", 2);
-	//		exit(EXIT_FAILURE);
-	//	}
-	//}
 	i = 0;
 	while (i < data->map_height)
 	{
@@ -484,6 +568,20 @@ void	ft_map_validation(char	**map, t_data *data)
 		}
 	}
 }
+
+int 	ft_destroy(t_data *data)
+{
+	mlx_destroy_window(data->mlx, data->win);
+	exit(0);
+}
+
+//int		ft_loop_hook(int width, int height,  t_data *data)
+//{
+//	printf("%d\n", width);
+//	printf("%d\n", height);
+//	return (0);
+//}
+
 void	ft_parser(char	**argv, t_data *data)
 {
 	int		fd;
@@ -509,7 +607,10 @@ void	ft_parser(char	**argv, t_data *data)
 	line = NULL;
 	ft_map_validation(map, data);
 	data->images = ft_fill_window(map, data);
-	n = mlx_key_hook(data->win, ft_key, data);
+	data->images->return_exit = 0;
+	mlx_key_hook(data->win, ft_key, data);
+	mlx_hook(data->win, 17, (1L<<17), ft_destroy, data);
+	//mlx_hook(data->win, 25, (1L<<18), ft_loop_hook, data);
 	return;
 }
 
@@ -527,6 +628,7 @@ int main(int argc, char **argv)
 	data.filename3 = "harry.xpm";
 	data.filename4 = "exit.xpm";
 	data.filename5 = "dementor.xpm";
+	data.filename6 = "phoenix.xpm";
 	data.mlx = mlx_init();
 	if (!data.mlx)
 	{

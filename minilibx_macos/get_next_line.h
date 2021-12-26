@@ -6,7 +6,7 @@
 /*   By: ayajirob@student.42.fr <ayajirob>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/04 18:48:58 by ayajirob          #+#    #+#             */
-/*   Updated: 2021/12/24 13:32:58 by ayajirob@st      ###   ########.fr       */
+/*   Updated: 2021/12/26 19:54:20 by ayajirob@st      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,5 +34,6 @@ char	*ft_reading(char *buffer, int fd);
 char	*ft_filling_line(char **buf, int fd, int index);
 char	**ft_split(char const *s, char c);
 char	*ft_substr(char const *s, unsigned int start, size_t len);
+char	*ft_itoa(int n);
 
 #endif
