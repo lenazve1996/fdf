@@ -419,6 +419,49 @@ void	ft_map_validation(char	**map, t_data *data)
 		i++;
 	data->map_height = i;
 	data->map_width = ft_strlen(map[0]);
+	//while (map[0][j] != '\0' && map[data->map_height - 1][j] != '\0')
+	//{
+	//	if (map[0][j] == '1' && map[data->map_height - 1][j] == '1')
+	//		j++;
+	//	else
+	//	{
+	//		ft_putstr_fd("1Error\nThe map is not valid: the map must be closed/surrounded by walls", 2);
+	//		exit(EXIT_FAILURE);
+	//	}
+	//}
+	//i = 0;
+	//while (i < data->map_height)
+	//{
+	//	if (map[i][0] == '1' && map[i][data->map_width - 1] == '1')
+	//		i++;
+	//	else
+	//	{
+	//		ft_putstr_fd("2Error\nThe map is not valid: the map must be closed/surrounded by walls", 2);
+	//		exit(EXIT_FAILURE);
+	//	}
+	//}
+	i = 0;
+	while (i < data->map_height)
+	{
+		if (ft_strchr(map[i], 'C') != NULL)
+			collectible++;
+		if (ft_strchr(map[i], 'P') != NULL)
+			dementor++;
+		if (ft_strchr(map[i], 'E') != NULL)
+			ex++;
+		if (i >= 1 && ft_strlen(map[i]) != data->map_width)
+		{
+			ft_putstr_fd("Error\nThe map is not valid: different line sizes", 2);
+			exit(EXIT_FAILURE);
+		}
+		i++;
+	}
+	if ((collectible == 0) || (dementor == 0) || (ex == 0))
+	{
+		ft_putstr_fd("Error\nThe map is not valid: map must have at least one exit, one collectible, and one starting position", 2);
+		exit(EXIT_FAILURE);
+	}
+
 	while (map[0][j] != '\0' && map[data->map_height - 1][j] != '\0')
 	{
 		if (map[0][j] == '1' && map[data->map_height - 1][j] == '1')
@@ -440,24 +483,7 @@ void	ft_map_validation(char	**map, t_data *data)
 			exit(EXIT_FAILURE);
 		}
 	}
-	i = 0;
-	while (i < data->map_height)
-	{
-		if (ft_strchr(map[i], 'C') != NULL)
-			collectible++;
-		if (ft_strchr(map[i], 'P') != NULL)
-			dementor++;
-		if (ft_strchr(map[i], 'E') != NULL)
-			ex++;
-		i++;
-	}
-	if ((collectible == 0) || (dementor == 0) || (ex == 0))
-	{
-		ft_putstr_fd("Error\nThe map is not valid: map must have at least one exit, one collectible, and one starting position", 2);
-		exit(EXIT_FAILURE);
-	}
 }
-
 void	ft_parser(char	**argv, t_data *data)
 {
 	int		fd;
