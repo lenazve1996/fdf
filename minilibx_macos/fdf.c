@@ -24,30 +24,29 @@ typedef struct	s_data{
 	void	*ex;
 	void	*dementor;
 	void	*enemy;
-	char	*filename;
-	char	*filename2;
-	char	*filename3;
-	char	*filename4;
-	char	*filename5;
-	char	*filename6;
-	//char	*moves;
 	int		movements;
 	int		img_height;
-	int		img_height2;
-	int		img_height3;
-	int		img_height4;
-	int		img_height5;
-	int		img_height6;
 	int		img_width;
-	int		img_width2;
-	int		img_width3;
-	int		img_width4;
-	int		img_width5;
-	int		img_width6;
 	int		map_width;
+	int		map_width_pix;
 	int		map_height;
+	int		map_height_pix;
 	t_img	*images;
 }				t_data;
+
+//int	ft_error_processing(char *str)
+//{
+//	perror(str);
+//	return(1);
+//}
+
+void	ft_error_inmap_read(char *line, char *tmp, char *str)
+{
+	free(line);
+	if (tmp != NULL)
+		free(tmp);
+	perror(str);
+}
 
 void	ft_lstadd_front(t_img  **lst, t_img  *new)
 {
@@ -111,38 +110,57 @@ char	*ft_strchr(const char *s, int c)
 	return (NULL);
 }
 
-t_img	*ft_fill_window(char **map, t_data *data)
+int	ft_win_and_images_creation(t_data *data)
 {
-	t_img	*head;
+	data->map_width_pix = data->map_width * data->img_width;
+	data->map_height_pix = data->map_height * data->img_height;
+	data->win = mlx_new_window(data->mlx, data->map_width_pix, data->map_height_pix, "so_long");
+	if (!data->win)
+	{
+		perror("Failed to open a new window");
+		return (1);
+	}
+	data->fence = mlx_xpm_file_to_image(data->mlx, "fence.xpm", &data->img_height, &data->img_width);
+	data->background = mlx_xpm_file_to_image(data->mlx, "back.xpm", &data->img_height, &data->img_width);
+	data->harry = mlx_xpm_file_to_image(data->mlx, "harry.xpm", &data->img_height, &data->img_width);
+	data->ex = mlx_xpm_file_to_image(data->mlx, "exit.xpm", &data->img_height, &data->img_width);
+	data->dementor = mlx_xpm_file_to_image(data->mlx, "dementor.xpm", &data->img_height, &data->img_width);
+	data->enemy = mlx_xpm_file_to_image(data->mlx, "phoenix.xpm", &data->img_height, &data->img_width);
+	if (data->fence == NULL || data->background == NULL || data->harry == NULL || data->ex == NULL || data->dementor == NULL || data->enemy == NULL)
+	{
+		ft_putstr_fd("Error\nmlx_xpm_file_to_image failed\n", 2);
+		return (1);
+	}
+	return (0);
+}
+
+int	ft_put_images(void *character, t_data *data, int c, int str, t_img *head)
+{
 	t_img	*new_elem;
-	int		height;
-	int		width;
-	int		img_height;
-	int		img_height2;
-	int		img_width;
-	int		img_width2;
-	int		x;
-	int		y;
+
+	mlx_put_image_to_window(data->mlx, data->win, data->background, c * data->img_width, str * data->img_height);
+	if (character != NULL)
+		mlx_put_image_to_window(data->mlx, data->win, character, c * data->img_width, str * data->img_height);
+	if (character == NULL)
+		new_elem = ft_lstnew(data->background, c * 64, str * 64);
+	else
+		new_elem = ft_lstnew(character, c * 64, str * 64);
+	ft_lstadd_back(&head, new_elem);
+	return (0);
+}
+
+int	ft_fill_window(char **map, t_data *data)
+{
+	t_img	*new_elem;
+	t_img	*head;
 	int		str;
 	int		c;
 	int		flag;
 
 	str = 0;
 	c = 0;
-	height = data->map_height * 64;
-	width = data->map_width * 64;
-	data->win = mlx_new_window(data->mlx, width, height, "fdf");
-	if (!data->win)
-	{
-		perror("Failed to open a new window");
-		exit(1);
-	}
-	data->background = mlx_xpm_file_to_image(data->mlx, data->filename2, &data->img_height, &data->img_width);
-	data->fence = mlx_xpm_file_to_image(data->mlx, data->filename, &data->img_height2, &data->img_width2);
-	data->harry = mlx_xpm_file_to_image(data->mlx, data->filename3, &data->img_height3, &data->img_width3);
-	data->ex = mlx_xpm_file_to_image(data->mlx, data->filename4, &data->img_height4, &data->img_width4);
-	data->dementor = mlx_xpm_file_to_image(data->mlx, data->filename5, &data->img_height5, &data->img_width5);
-	data->enemy = mlx_xpm_file_to_image(data->mlx, data->filename6, &data->img_height6, &data->img_width6);
+	if (ft_win_and_images_creation(data) == 1)
+		return (1);
 	flag = -1;
 	while (map[str] != NULL)
 	{
@@ -151,7 +169,7 @@ t_img	*ft_fill_window(char **map, t_data *data)
 		{
 			if (map[str][c] == '1')
 			{
-				mlx_put_image_to_window(data->mlx, data->win, data->fence, c * 64, str * 64);
+				mlx_put_image_to_window(data->mlx, data->win, data->fence, c * data->img_width, str * data->img_height);
 				if(flag == -1)
 				{
 					head = ft_lstnew(data->fence, c * 64, str * 64);
@@ -165,37 +183,42 @@ t_img	*ft_fill_window(char **map, t_data *data)
 			}
 			else if (map[str][c] == '0')
 			{
-				mlx_put_image_to_window(data->mlx, data->win, data->background, c * 64, str * 64);
-				new_elem = ft_lstnew(data->background, c * 64, str * 64);
-				ft_lstadd_back(&head, new_elem);
+				ft_put_images(NULL, data, c, str, head);
+				//mlx_put_image_to_window(data->mlx, data->win, data->background, c * 64, str * 64);
+				//new_elem = ft_lstnew(data->background, c * 64, str * 64);
+				//ft_lstadd_back(&head, new_elem);
 			}
 			else if (map[str][c] == 'P')
 			{
-				mlx_put_image_to_window(data->mlx, data->win, data->background, c * 64, str * 64);
-				mlx_put_image_to_window(data->mlx, data->win, data->dementor, c * 64, str * 64);
-				new_elem = ft_lstnew(data->dementor, c * 64, str * 64);
-				ft_lstadd_back(&head, new_elem);
+				ft_put_images(data->dementor, data, c, str, head);
+				//mlx_put_image_to_window(data->mlx, data->win, data->background, c * 64, str * 64);
+				//mlx_put_image_to_window(data->mlx, data->win, data->dementor, c * 64, str * 64);
+				//new_elem = ft_lstnew(data->dementor, c * 64, str * 64);
+				//ft_lstadd_back(&head, new_elem);
 			}
 			else if (map[str][c] == 'E')
 			{
-				mlx_put_image_to_window(data->mlx, data->win, data->background, c * 64, str * 64);
-				mlx_put_image_to_window(data->mlx, data->win, data->ex, c * 64, str * 64);
-				new_elem = ft_lstnew(data->ex, c * 64, str * 64);
-				ft_lstadd_back(&head, new_elem);
+				ft_put_images(data->ex, data, c, str, head);
+				//mlx_put_image_to_window(data->mlx, data->win, data->background, c * 64, str * 64);
+				//mlx_put_image_to_window(data->mlx, data->win, data->ex, c * 64, str * 64);
+				//new_elem = ft_lstnew(data->ex, c * 64, str * 64);
+				//ft_lstadd_back(&head, new_elem);
 			}
 			else if (map[str][c] == 'C')
 			{
-				mlx_put_image_to_window(data->mlx, data->win, data->background, c * 64, str * 64);
-				mlx_put_image_to_window(data->mlx, data->win, data->harry, c * 64, str * 64);
-				new_elem = ft_lstnew(data->harry, c * 64, str * 64);
-				ft_lstadd_back(&head, new_elem);
+				ft_put_images(data->harry, data, c, str, head);
+				//mlx_put_image_to_window(data->mlx, data->win, data->background, c * 64, str * 64);
+				//mlx_put_image_to_window(data->mlx, data->win, data->harry, c * 64, str * 64);
+				//new_elem = ft_lstnew(data->harry, c * 64, str * 64);
+				//ft_lstadd_back(&head, new_elem);
 			}
 			else if (map[str][c] == 'N')
 			{
-				mlx_put_image_to_window(data->mlx, data->win, data->background, c * 64, str * 64);
-				mlx_put_image_to_window(data->mlx, data->win, data->enemy, c * 64, str * 64);
-				new_elem = ft_lstnew(data->enemy, c * 64, str * 64);
-				ft_lstadd_back(&head, new_elem);
+				ft_put_images(data->enemy, data, c, str, head);
+				//mlx_put_image_to_window(data->mlx, data->win, data->background, c * 64, str * 64);
+				//mlx_put_image_to_window(data->mlx, data->win, data->enemy, c * 64, str * 64);
+				//new_elem = ft_lstnew(data->enemy, c * 64, str * 64);
+				//ft_lstadd_back(&head, new_elem);
 			}
 			c++;
 		}
@@ -215,7 +238,8 @@ t_img	*ft_fill_window(char **map, t_data *data)
 	//	new_elem = new_elem->next;
 	//	i++;
 	//}
-	return (head);
+	data->images = head;
+	return (0);
 }
 
 char	*ft_map_read(int fd)
@@ -226,19 +250,31 @@ char	*ft_map_read(int fd)
 
 	n = 1;
 	line = (char *)malloc(2 * sizeof(char));
+	if (line == NULL)
+	{
+		perror("Error\nMalloc failed");
+		return (NULL);
+	}
+	line[0] = '\0';
 	tmp = (char *)malloc(2 * sizeof(char));
-	read(fd, line, 1);
-	line[1] = '\0';
-
+	if (tmp == NULL)
+	{
+		ft_error_inmap_read(line, NULL, "Error\nMalloc failed");
+		return (NULL);
+	}
 	while (n != 0)
 	{
 		n = read(fd, tmp, 1);
+		if (n == -1)
+		{
+			ft_error_inmap_read(line, tmp, "Error\nRead failed");
+			return (NULL);
+		}
 		tmp[1] = '\0';
 		if (n != 0)
 			line = ft_strjoin(line, tmp);
 	}
 	free(tmp);
-	tmp = NULL;
 	return (line);
 }
 
@@ -507,24 +543,17 @@ int	ft_key(int keycode, t_data *data)
 	return (0);
 }
 
-void	ft_map_validation(char	**map, t_data *data)
+int	ft_check_characters(char **map, t_data *data)
 {
 	int	i;
-	int	j;
 	int	collectible;
 	int	dementor;
 	int	ex;
 
 	i = 0;
-	j = 0;
 	collectible = 0;
 	dementor = 0;
 	ex = 0;
-	while (map[i] != NULL)
-		i++;
-	data->map_height = i;
-	data->map_width = ft_strlen(map[0]);
-	i = 0;
 	while (i < data->map_height)
 	{
 		if (ft_strchr(map[i], 'C') != NULL)
@@ -533,40 +562,60 @@ void	ft_map_validation(char	**map, t_data *data)
 			dementor++;
 		if (ft_strchr(map[i], 'E') != NULL)
 			ex++;
-		if (i >= 1 && ft_strlen(map[i]) != data->map_width)
+		if (i >= 1 && (int)ft_strlen(map[i]) != data->map_width)
 		{
-			ft_putstr_fd("Error\nThe map is not valid: different line sizes", 2);
-			exit(EXIT_FAILURE);
+			ft_putstr_fd("Error\nThe map is not valid: different line sizes\n", 2);
+			return (1);
 		}
 		i++;
 	}
 	if ((collectible == 0) || (dementor == 0) || (ex == 0))
 	{
-		ft_putstr_fd("Error\nThe map is not valid: map must have at least one exit, one collectible, and one starting position", 2);
-		exit(EXIT_FAILURE);
+		ft_putstr_fd("Error\nThe map is not valid: map must have at least one exit, one collectible, and one starting position\n", 2);
+		return (1);
 	}
+	return (0);
+}
 
-	while (map[0][j] != '\0' && map[data->map_height - 1][j] != '\0')
+int	ft_check_walls(char **map, t_data *data)
+{
+	int	str;
+	int	c;
+
+	c = 0;
+	str = 0;
+	while (map[0][c] != '\0' && map[data->map_height - 1][c] != '\0')
 	{
-		if (map[0][j] == '1' && map[data->map_height - 1][j] == '1')
-			j++;
+		if (map[0][c] == '1' && map[data->map_height - 1][c] == '1')
+			c++;
 		else
 		{
-			ft_putstr_fd("1Error\nThe map is not valid: the map must be closed/surrounded by walls", 2);
-			exit(EXIT_FAILURE);
+			ft_putstr_fd("Error\nThe map is not valid: the map must be closed/surrounded by walls\n", 2);
+			return (1);
 		}
 	}
-	i = 0;
-	while (i < data->map_height)
+	while (str < data->map_height)
 	{
-		if (map[i][0] == '1' && map[i][data->map_width - 1] == '1')
-			i++;
+		if (map[str][0] == '1' && map[str][data->map_width - 1] == '1')
+			str++;
 		else
 		{
-			ft_putstr_fd("2Error\nThe map is not valid: the map must be closed/surrounded by walls", 2);
-			exit(EXIT_FAILURE);
+			ft_putstr_fd("Error\nThe map is not valid: the map must be closed/surrounded by walls\n", 2);
+			return (1);
 		}
 	}
+	return (0);
+}
+
+int	ft_map_validation(char **map, t_data *data)
+{
+	data->map_height = 0;
+	while (map[data->map_height] != NULL)
+		data->map_height++;
+	data->map_width = ft_strlen(map[0]);
+	if (ft_check_characters(map, data) == 1 || ft_check_walls(map, data) == 1)
+		return (1);
+	return (0);
 }
 
 int 	ft_destroy(t_data *data)
@@ -575,67 +624,58 @@ int 	ft_destroy(t_data *data)
 	exit(0);
 }
 
-//int		ft_loop_hook(int width, int height,  t_data *data)
-//{
-//	printf("%d\n", width);
-//	printf("%d\n", height);
-//	return (0);
-//}
-
-void	ft_parser(char	**argv, t_data *data)
+int	ft_parser(char	**argv, t_data *data)
 {
 	int		fd;
-	int		i;
-	int		n;
 	char	**map;
 	char	*line;
 
-	i = 0;
 	data->movements = 0;
-	map = (char **)malloc(10 * sizeof(char *));
-	if (!map)
-	{
-		perror("Malloc failed");
-		exit(1);
-	}
 	fd = open(argv[1], O_RDONLY);
 	if (fd == -1)
-			perror("Failed to open map");
+	{
+		perror("Failed to open map");
+		return (1);
+	}
 	line = ft_map_read(fd);
+	if (line == NULL)
+		return (1);
 	map = ft_split(line, '\n');
+	if (map == NULL)
+		return (1);
 	free(line);
-	line = NULL;
-	ft_map_validation(map, data);
-	data->images = ft_fill_window(map, data);
+	if (ft_map_validation(map, data) == 1)
+		return (1);
+	if (ft_fill_window(map, data) == 1)
+		return (1);
 	data->images->return_exit = 0;
 	mlx_key_hook(data->win, ft_key, data);
 	mlx_hook(data->win, 17, (1L<<17), ft_destroy, data);
 	//mlx_hook(data->win, 25, (1L<<18), ft_loop_hook, data);
-	return;
+	return (0);
 }
 
 int main(int argc, char **argv)
 {
 	t_data	data;
+	int		parser_result;
 
 	if (argc != 2)
 	{
 		ft_putstr_fd("The number of arguments should be 1: file with a map with the .ber extension\n", 2);
 		return (1);
 	}
-	data.filename = "fence.xpm";
-	data.filename2 = "back.xpm";
-	data.filename3 = "harry.xpm";
-	data.filename4 = "exit.xpm";
-	data.filename5 = "dementor.xpm";
-	data.filename6 = "phoenix.xpm";
 	data.mlx = mlx_init();
+	data.img_width = 64;
+	data.img_height = 64;
 	if (!data.mlx)
 	{
-		ft_putstr_fd("Failed to set up the connection to the graphical system", 1);
+		ft_putstr_fd("Error\nFailed to set up the connection to the graphical system", 2);
 		return (1);
 	}
-	ft_parser(argv, &data);
+	parser_result = ft_parser(argv, &data);
+	if (parser_result == 1)
+		return (1);
 	mlx_loop(data.mlx);
 	return (0);
 }

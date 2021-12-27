@@ -6,7 +6,7 @@
 /*   By: ayajirob@student.42.fr <ayajirob>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/04 18:48:01 by ayajirob          #+#    #+#             */
-/*   Updated: 2021/12/24 13:45:34 by ayajirob@st      ###   ########.fr       */
+/*   Updated: 2021/12/27 15:06:21 by ayajirob@st      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,11 @@ size_t	ft_strlen(const char *s)
 	length = 0;
 	if (!s)
 		return (0);
-	while (*s++ != '\0')
+	while (*s != '\0')
+	{
 		length++;
+		s++;
+	}
 	return (length);
 }
 
