@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include "get_next_line.h"
 
-typedef struct	s_img
+typedef struct s_img
 {
 	void	*mlx_img;
 	int		return_exit;
@@ -14,8 +14,7 @@ typedef struct	s_img
 	void	*next;
 }				t_img;
 
-
-typedef struct	s_data{
+typedef struct s_data{
 	void	*win;
 	void	*mlx;
 	void	*background;
@@ -48,7 +47,7 @@ void	ft_error_inmap_read(char *line, char *tmp, char *str)
 	perror(str);
 }
 
-void	ft_lstadd_front(t_img  **lst, t_img  *new)
+void	ft_lstadd_front(t_img **lst, t_img *new)
 {
 	new->next = *lst;
 	*lst = new;
@@ -170,7 +169,7 @@ int	ft_fill_window(char **map, t_data *data)
 			if (map[str][c] == '1')
 			{
 				mlx_put_image_to_window(data->mlx, data->win, data->fence, c * data->img_width, str * data->img_height);
-				if(flag == -1)
+				if (flag == -1)
 				{
 					head = ft_lstnew(data->fence, c * 64, str * 64);
 					flag = 0;
@@ -289,14 +288,14 @@ int	ft_key(int keycode, t_data *data)
 	tmp = data->images;
 	if (keycode == 0)
 	{
-		while(tmp->mlx_img != data->dementor)
+		while (tmp->mlx_img != data->dementor)
 		{
 			tmp = tmp->next;
 			i++;
 		}
 		old_pos = tmp;
 		tmp = data->images;
-		while(i > 1)
+		while (i > 1)
 		{
 			tmp = tmp->next;
 			i--;
@@ -350,7 +349,7 @@ int	ft_key(int keycode, t_data *data)
 	}
 	else if (keycode == 1)
 	{
-		while(tmp->mlx_img != data->dementor)
+		while (tmp->mlx_img != data->dementor)
 		{
 			tmp = tmp->next;
 		}
@@ -409,7 +408,7 @@ int	ft_key(int keycode, t_data *data)
 	}
 	else if (keycode == 2)
 	{
-		while(tmp->mlx_img != data->dementor)
+		while (tmp->mlx_img != data->dementor)
 		{
 			tmp = tmp->next;
 		}
@@ -464,7 +463,7 @@ int	ft_key(int keycode, t_data *data)
 	}
 	else if (keycode == 13)
 	{
-		while(tmp->mlx_img != data->dementor)
+		while (tmp->mlx_img != data->dementor)
 		{
 			tmp = tmp->next;
 			i++;
@@ -618,7 +617,7 @@ int	ft_map_validation(char **map, t_data *data)
 	return (0);
 }
 
-int 	ft_destroy(t_data *data)
+int	ft_destroy(t_data *data)
 {
 	mlx_destroy_window(data->mlx, data->win);
 	exit(0);
@@ -650,12 +649,11 @@ int	ft_parser(char	**argv, t_data *data)
 		return (1);
 	data->images->return_exit = 0;
 	mlx_key_hook(data->win, ft_key, data);
-	mlx_hook(data->win, 17, (1L<<17), ft_destroy, data);
-	//mlx_hook(data->win, 25, (1L<<18), ft_loop_hook, data);
+	mlx_hook(data->win, 17, (1L <<17), ft_destroy, data);
 	return (0);
 }
 
-int main(int argc, char **argv)
+int	main(int argc, char **argv)
 {
 	t_data	data;
 	int		parser_result;
