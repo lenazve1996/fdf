@@ -23,6 +23,8 @@ typedef struct s_data{
 	void	*ex;
 	void	*dementor;
 	void	*enemy;
+	int		tmp_str;
+	int		tmp_c;
 	int		movements;
 	int		img_height;
 	int		img_width;
@@ -133,89 +135,98 @@ int	ft_win_and_images_creation(t_data *data)
 	return (0);
 }
 
-int	ft_put_images(void *character, t_data *data, int c, int str, t_img *head)
+int	ft_put_images_to_background(t_data *data, char symbol)
+{
+	t_img	*new_elem;
+	char	*character;
+
+	mlx_put_image_to_window(data->mlx, data->win, data->background, data->tmp_c * data->img_width, data->tmp_str * data->img_height);
+	if (symbol == 'P')
+		character = data->dementor;
+	else if (symbol == 'E')
+		character = data->ex;
+	else if (symbol == 'C')
+		character = data->harry;
+	else if (symbol == 'N')
+		character = data->enemy;
+	mlx_put_image_to_window(data->mlx, data->win, character, data->tmp_c * data->img_width, data->tmp_str * data->img_height);
+	new_elem = ft_lstnew(character, data->tmp_c * data->img_width, data->tmp_str * data->img_height);
+	if (new_elem == NULL)
+		return (1);
+	ft_lstadd_back(&data->images, new_elem);
+	return (0);
+}
+
+int	ft_put_walls(int str, int c, t_data *data)
 {
 	t_img	*new_elem;
 
-	mlx_put_image_to_window(data->mlx, data->win, data->background, c * data->img_width, str * data->img_height);
-	if (character == NULL)
+	mlx_put_image_to_window(data->mlx, data->win, data->fence, c * data->img_width, str * data->img_height);
+	if (str == 0 && c == 0)
 	{
-		new_elem = ft_lstnew(data->background, c * data->img_width, str * data->img_height);
-		if (new_elem == NULL)
+		data->images = ft_lstnew(data->fence, c * data->img_width, str * data->img_height);
+		if (data->images == NULL)
 			return (1);
+		mlx_string_put(data->mlx, data->win, 24, 24, 0x00FF0000, ft_itoa(data->movements));
 	}
 	else
 	{
-		mlx_put_image_to_window(data->mlx, data->win, character, c * data->img_width, str * data->img_height);
-		new_elem = ft_lstnew(character, c * 64, str * 64);
+		new_elem = ft_lstnew(data->fence, c * data->img_width, str * data->img_height);
 		if (new_elem == NULL)
 			return (1);
+		ft_lstadd_back(&data->images, new_elem);
 	}
-	ft_lstadd_back(&head, new_elem);
 	return (0);
+}
+
+int	ft_put_background(t_data *data)
+{
+	t_img	*new_elem;
+
+	mlx_put_image_to_window(data->mlx, data->win, data->background, data->tmp_c * data->img_width, data->tmp_str * data->img_height);
+	new_elem = ft_lstnew(data->background, data->tmp_c * data->img_width, data->tmp_str * data->img_height);
+	if (new_elem == NULL)
+		return (1);
+	ft_lstadd_back(&data->images, new_elem);
+	return(0);
 }
 
 int	ft_fill_window(char **map, t_data *data)
 {
-	t_img	*new_elem;
-	t_img	*head;
 	int		str;
+	char	symbol;
 	int		c;
-	int		flag;
 
-	str = 0;
-	c = 0;
-	if (ft_win_and_images_creation(data) == 1)
-		return (1);
-	flag = -1;
-	while (map[str] != NULL)
+	data->tmp_str = 0;
+	while (map[data->tmp_str] != NULL)
 	{
-		c = 0;
-		while (map[str][c] != '\0')
+		data->tmp_c = 0;
+		while (map[data->tmp_str][data->tmp_c] != '\0')
 		{
-			if (map[str][c] == '1')
+			symbol = map[data->tmp_str][data->tmp_c];
+			if (map[data->tmp_str][data->tmp_c] == '1')
 			{
-				mlx_put_image_to_window(data->mlx, data->win, data->fence, c * data->img_width, str * data->img_height);
-				if (flag == -1)
-				{
-					head = ft_lstnew(data->fence, c * 64, str * 64);
-					flag = 0;
-				}
-				else
-				{
-					new_elem = ft_lstnew(data->fence, c * 64, str * 64);
-					ft_lstadd_back(&head, new_elem);
-				}
+				if (ft_put_walls(data->tmp_str, data->tmp_c, data) == 1)
+					return (1);
+				printf("here walls %d %d \n", data->tmp_str, data->tmp_c);
 			}
-			else if (map[str][c] == '0')
-				ft_put_images(NULL, data, c, str, head);
-			else if (map[str][c] == 'P')
-				ft_put_images(data->dementor, data, c, str, head);
-			else if (map[str][c] == 'E')
-				ft_put_images(data->ex, data, c, str, head);
-			else if (map[str][c] == 'C')
-				ft_put_images(data->harry, data, c, str, head);
-			else if (map[str][c] == 'N')
-				ft_put_images(data->enemy, data, c, str, head);
-			c++;
+			else if (map[data->tmp_str][data->tmp_c] == '0')
+			{
+				if (ft_put_background(data) == 1)
+					return (1);
+				printf("here back %d %d \n", data->tmp_str, data->tmp_c);
+			}
+			else if (map[data->tmp_str][data->tmp_c] == 'P' || map[data->tmp_str][data->tmp_c] == 'E' || map[data->tmp_str][data->tmp_c] == 'C' || map[data->tmp_str][data->tmp_c] == 'N')
+			{
+				if (ft_put_images_to_background(data, symbol) == 1)
+					return (1);
+				printf("here characters %d %d \n", data->tmp_str, data->tmp_c);
+			}
+			data->tmp_c++;
 		}
-		str++;
+		data->tmp_str++;
 	}
-	mlx_string_put(data->mlx, data->win, 24, 24, 0x00FF0000, ft_itoa(data->movements));
-	//new_elem = head;
-	//i = 0;
-	//while(new_elem != NULL)
-	//{
-	//	printf("--->%d<---\n", i);
-	//	printf("%p\n", new_elem);
-	//	printf("%p\n", new_elem->mlx_img);
-	//	printf("%d\n", new_elem->x);
-	//	printf("%d\n", new_elem->y);
-	//	printf("%p\n\n", new_elem->next);
-	//	new_elem = new_elem->next;
-	//	i++;
-	//}
-	data->images = head;
+	printf("here\n");
 	return (0);
 }
 
@@ -622,6 +633,8 @@ int	ft_parser(char	**argv, t_data *data)
 		return (1);
 	free(line);
 	if (ft_map_validation(map, data) == 1)
+		return (1);
+	if (ft_win_and_images_creation(data) == 1)
 		return (1);
 	if (ft_fill_window(map, data) == 1)
 		return (1);
