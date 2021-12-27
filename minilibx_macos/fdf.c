@@ -138,12 +138,19 @@ int	ft_put_images(void *character, t_data *data, int c, int str, t_img *head)
 	t_img	*new_elem;
 
 	mlx_put_image_to_window(data->mlx, data->win, data->background, c * data->img_width, str * data->img_height);
-	if (character != NULL)
-		mlx_put_image_to_window(data->mlx, data->win, character, c * data->img_width, str * data->img_height);
 	if (character == NULL)
-		new_elem = ft_lstnew(data->background, c * 64, str * 64);
+	{
+		new_elem = ft_lstnew(data->background, c * data->img_width, str * data->img_height);
+		if (new_elem == NULL)
+			return (1);
+	}
 	else
+	{
+		mlx_put_image_to_window(data->mlx, data->win, character, c * data->img_width, str * data->img_height);
 		new_elem = ft_lstnew(character, c * 64, str * 64);
+		if (new_elem == NULL)
+			return (1);
+	}
 	ft_lstadd_back(&head, new_elem);
 	return (0);
 }
@@ -181,44 +188,15 @@ int	ft_fill_window(char **map, t_data *data)
 				}
 			}
 			else if (map[str][c] == '0')
-			{
 				ft_put_images(NULL, data, c, str, head);
-				//mlx_put_image_to_window(data->mlx, data->win, data->background, c * 64, str * 64);
-				//new_elem = ft_lstnew(data->background, c * 64, str * 64);
-				//ft_lstadd_back(&head, new_elem);
-			}
 			else if (map[str][c] == 'P')
-			{
 				ft_put_images(data->dementor, data, c, str, head);
-				//mlx_put_image_to_window(data->mlx, data->win, data->background, c * 64, str * 64);
-				//mlx_put_image_to_window(data->mlx, data->win, data->dementor, c * 64, str * 64);
-				//new_elem = ft_lstnew(data->dementor, c * 64, str * 64);
-				//ft_lstadd_back(&head, new_elem);
-			}
 			else if (map[str][c] == 'E')
-			{
 				ft_put_images(data->ex, data, c, str, head);
-				//mlx_put_image_to_window(data->mlx, data->win, data->background, c * 64, str * 64);
-				//mlx_put_image_to_window(data->mlx, data->win, data->ex, c * 64, str * 64);
-				//new_elem = ft_lstnew(data->ex, c * 64, str * 64);
-				//ft_lstadd_back(&head, new_elem);
-			}
 			else if (map[str][c] == 'C')
-			{
 				ft_put_images(data->harry, data, c, str, head);
-				//mlx_put_image_to_window(data->mlx, data->win, data->background, c * 64, str * 64);
-				//mlx_put_image_to_window(data->mlx, data->win, data->harry, c * 64, str * 64);
-				//new_elem = ft_lstnew(data->harry, c * 64, str * 64);
-				//ft_lstadd_back(&head, new_elem);
-			}
 			else if (map[str][c] == 'N')
-			{
 				ft_put_images(data->enemy, data, c, str, head);
-				//mlx_put_image_to_window(data->mlx, data->win, data->background, c * 64, str * 64);
-				//mlx_put_image_to_window(data->mlx, data->win, data->enemy, c * 64, str * 64);
-				//new_elem = ft_lstnew(data->enemy, c * 64, str * 64);
-				//ft_lstadd_back(&head, new_elem);
-			}
 			c++;
 		}
 		str++;
