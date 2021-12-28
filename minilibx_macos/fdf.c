@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   fdf.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ayajirob@student.42.fr <ayajirob>          +#+  +:+       +#+        */
+/*   By: ayajirob <ayajirob@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/28 20:17:18 by ayajirob@st       #+#    #+#             */
-/*   Updated: 2021/12/28 20:17:19 by ayajirob@st      ###   ########.fr       */
+/*   Updated: 2021/12/29 00:11:09 by ayajirob         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <mlx.h>
+#include "mlx.h"
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
@@ -36,6 +36,7 @@ typedef struct s_data{
 	void	*ex;
 	void	*plr;
 	void	*enemy;
+	char	**map;
 	int		tmp_str;
 	int		tmp_c;
 	int		movements;
@@ -48,6 +49,19 @@ typedef struct s_data{
 	t_img	*images;
 }				t_data;
 
+void	ft_cleaning(t_data *data)
+{
+	int s;
+
+	s = 0;
+	while (s <= data->map_height)
+	{
+		free(data->map[s]);
+		s++;
+	}
+	// ft_lstclear_list(data->images);
+}
+
 void	ft_error_inmap_read(char *line, char *tmp, char *str)
 {
 	free(line);
@@ -55,6 +69,18 @@ void	ft_error_inmap_read(char *line, char *tmp, char *str)
 		free(tmp);
 	perror(str);
 }
+
+// void ft_lstclear_list(t_img *lst)
+// {
+//     t_img *tmp;
+
+//     while(lst != NULL)
+//     {
+//         tmp = lst;
+//         lst = tmp->next;
+// 		free(tmp);
+//     }
+// }
 
 void	ft_lstadd_front(t_img **lst, t_img *new)
 {
@@ -137,11 +163,11 @@ int	ft_win_and_images_creation(t_data *data)
 		perror("Failed to open a new window");
 		return (1);
 	}
-	data->wall = mlx_xpm_file_to_image(data->ml, "fence.xpm", h, w);
-	data->fond = mlx_xpm_file_to_image(data->ml, "back.xpm", h, w);
+	data->wall = mlx_xpm_file_to_image(data->ml, "tree.xpm", h, w);
+	data->fond = mlx_xpm_file_to_image(data->ml, "paper.xpm", h, w);
 	data->harry = mlx_xpm_file_to_image(data->ml, "harry.xpm", h, w);
 	data->ex = mlx_xpm_file_to_image(data->ml, "exit.xpm", h, w);
-	data->plr = mlx_xpm_file_to_image(data->ml, "dementor.xpm", h, w);
+	data->plr = mlx_xpm_file_to_image(data->ml, "dem2.xpm", h, w);
 	data->enemy = mlx_xpm_file_to_image(data->ml, "phoenix.xpm", h, w);
 	if (data->wall == NULL || data->fond == NULL || data->harry == NULL || \
 	data->ex == NULL || data->plr == NULL || data->enemy == NULL)
@@ -184,6 +210,7 @@ int	ft_put_walls(int s, int c, t_data *data)
 
 	x = c * data->im_wid;
 	y = s * data->im_hei;
+	mlx_put_image_to_window(data->ml, data->wn, data->fond , x, y);
 	mlx_put_image_to_window(data->ml, data->wn, data->wall, x, y);
 	if (s == 0 && c == 0)
 	{
@@ -192,6 +219,7 @@ int	ft_put_walls(int s, int c, t_data *data)
 			return (1);
 		moves = ft_itoa(data->movements);
 		mlx_string_put(data->ml, data->wn, 24, 24, 0x00FF0000, moves);
+		free(moves);
 	}
 	else
 	{
@@ -298,6 +326,7 @@ char	*ft_map_read(int fd)
 		return (NULL);
 	}
 	line = ft_reading(line, tmp, fd);
+	free(tmp);
 	return (line);
 }
 
@@ -308,6 +337,7 @@ int	ft_player_lose(t_img *new_p, t_data *data)
 	mlx_destroy_window(data->ml, data->wn);
 	++data->movements;
 	printf("%d\n", data->movements);
+	ft_cleaning(data);
 	exit (0);
 }
 
@@ -349,6 +379,7 @@ void	ft_player_move_to_exit(t_img *old_p, t_img *new_p, t_data *data)
 		++data->movements;
 		printf("%d\n", data->movements);
 		mlx_destroy_window(data->ml, data->wn);
+		ft_cleaning(data);
 		exit(0);
 	}
 	++data->movements;
@@ -369,6 +400,7 @@ int	ft_move_processing(t_img *old_p, t_img *new_p, t_data *data)
 	mlx_put_image_to_window(data->ml, data->wn, data->wall, 0, 0);
 	moves = ft_itoa(data->movements);
 	mlx_string_put(data->ml, data->wn, 24, 24, 0x00FF0000, moves);
+	free(moves);
 	return (0);
 }
 
@@ -411,7 +443,8 @@ int	ft_key(int keycode, t_data *data)
 		while (old_p->img != data->plr)
 			old_p = old_p->next;
 		new_p = ft_locate_new_pos(data, keycode, old_p);
-		ft_move_processing(old_p, new_p, data);
+		if (ft_move_processing(old_p, new_p, data) == 1)
+			return (1);
 	}
 	else if (keycode == 53)
 	{
@@ -421,6 +454,7 @@ int	ft_key(int keycode, t_data *data)
 		//mlx_destroy_image(data->ml, data->harry);
 		//mlx_destroy_image(data->ml, data->ex);
 		mlx_destroy_window(data->ml, data->wn);
+		ft_cleaning(data);
 		exit(0);
 	}
 	return (0);
@@ -498,6 +532,7 @@ int	ft_map_validation(char **map, t_data *data)
 int	ft_destroy(t_data *data)
 {
 	mlx_destroy_window(data->ml, data->wn);
+	ft_cleaning(data);
 	exit(0);
 }
 
@@ -518,6 +553,7 @@ int	ft_parser(char	**argv, t_data *data)
 	if (line == NULL)
 		return (1);
 	map = ft_split(line, '\n');
+	data->map = map;
 	if (map == NULL)
 	{
 		free(line);
@@ -547,7 +583,10 @@ int	main(int argc, char **argv)
 		return (ft_putstr_fd_ret("Error\nFailed to set up the connection", 2));
 	parser_result = ft_parser(argv, &data);
 	if (parser_result == 1)
+	{
+		ft_cleaning(&data);
 		return (1);
+	}
 	data.images->return_exit = 0;
 	mlx_key_hook(data.wn, ft_key, &data);
 	mlx_hook(data.wn, 17, (1L << 17), ft_destroy, &data);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.h                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ayajirob@student.42.fr <ayajirob>          +#+  +:+       +#+        */
+/*   By: ayajirob <ayajirob@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/04 18:48:58 by ayajirob          #+#    #+#             */
-/*   Updated: 2021/12/28 20:16:00 by ayajirob@st      ###   ########.fr       */
+/*   Updated: 2021/12/29 00:08:23 by ayajirob         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,5 +35,6 @@ char	*ft_filling_line(char **buf, int fd, int index);
 char	**ft_split(char const *s, char c);
 char	*ft_substr(char const *s, unsigned int start, size_t len);
 char	*ft_itoa(int n);
+// void    ft_lstclear_list(t_img *lst);
 
 #endif
