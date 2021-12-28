@@ -12,6 +12,7 @@ typedef struct s_img
 	int		x;
 	int		y;
 	void	*next;
+	void	*prev;
 }				t_img;
 
 typedef struct s_data{
@@ -80,6 +81,7 @@ t_img	*ft_lstnew(void	*mlx_img, int n, int j)
 	new_element->x = n;
 	new_element->y = j;
 	new_element->next = NULL;
+	new_element->prev = NULL;
 	return (new_element);
 }
 
@@ -91,6 +93,7 @@ void	ft_lstadd_back(t_img **lst, t_img *new)
 	{
 		last_elem = ft_lstlast(*lst);
 		last_elem->next = new;
+		new->prev = last_elem; 
 	}
 	else if (*lst == NULL)
 	{
@@ -154,6 +157,9 @@ int	ft_put_images_to_background(t_data *data, char symbol)
 	if (new_elem == NULL)
 		return (1);
 	ft_lstadd_back(&data->images, new_elem);
+	//printf("created %p\n", new_elem);
+	//printf("previous %p\n", new_elem->prev);
+	//printf("next %p\n", new_elem->next);
 	return (0);
 }
 
@@ -176,6 +182,9 @@ int	ft_put_walls(int str, int c, t_data *data)
 			return (1);
 		ft_lstadd_back(&data->images, new_elem);
 	}
+	//printf("created %p\n", new_elem);
+	//printf("previous %p\n", new_elem->prev);
+	//printf("next %p\n", new_elem->next);
 	return (0);
 }
 
@@ -188,6 +197,9 @@ int	ft_put_background(t_data *data)
 	if (new_elem == NULL)
 		return (1);
 	ft_lstadd_back(&data->images, new_elem);
+	//printf("created %p\n", new_elem);
+	//printf("previous %p\n", new_elem->prev);
+	//printf("next %p\n", new_elem->next);
 	return(0);
 }
 
@@ -196,6 +208,7 @@ int	ft_fill_window(char **map, t_data *data)
 	int		str;
 	char	symbol;
 	int		c;
+	t_img	*tmp;
 
 	data->tmp_str = 0;
 	while (map[data->tmp_str] != NULL)
@@ -226,6 +239,16 @@ int	ft_fill_window(char **map, t_data *data)
 		}
 		data->tmp_str++;
 	}
+	tmp = data->images;
+	//while (tmp != NULL)
+	//{
+	//	printf("%p\n", data->images);
+	//	printf("%p\n", data->images->prev);
+	//	printf("%p\n", data->images->next);
+	//	printf("%p\n\n", data->images->mlx_img);
+	//	tmp = tmp->next;
+	//}
+	//printf("");
 	printf("here\n");
 	return (0);
 }
@@ -266,6 +289,12 @@ char	*ft_map_read(int fd)
 	return (line);
 }
 
+void	ft_return_exit()
+{
+	
+}
+
+
 int	ft_key(int keycode, t_data *data)
 {
 	t_img	*tmp;
@@ -274,21 +303,12 @@ int	ft_key(int keycode, t_data *data)
 
 	i = 0;
 	printf("%d\n", keycode);
-	tmp = data->images;
+	old_pos = data->images;
 	if (keycode == 0)
 	{
-		while (tmp->mlx_img != data->dementor)
-		{
-			tmp = tmp->next;
-			i++;
-		}
-		old_pos = tmp;
-		tmp = data->images;
-		while (i > 1)
-		{
-			tmp = tmp->next;
-			i--;
-		}
+		while (old_pos->mlx_img != data->dementor)
+			old_pos = old_pos->next;
+		tmp = old_pos->prev;
 		if (tmp->mlx_img != data->fence && tmp->mlx_img != data->ex && tmp->mlx_img != data->enemy)
 		{
 			mlx_put_image_to_window(data->mlx, data->win, data->background, old_pos->x, old_pos->y);
@@ -338,11 +358,9 @@ int	ft_key(int keycode, t_data *data)
 	}
 	else if (keycode == 1)
 	{
-		while (tmp->mlx_img != data->dementor)
-		{
-			tmp = tmp->next;
-		}
-		old_pos = tmp;
+		while (old_pos->mlx_img != data->dementor)
+			old_pos = old_pos->next;
+		tmp = old_pos;
 		while (i < (data->map_width))
 		{
 			tmp = tmp->next;
@@ -397,12 +415,11 @@ int	ft_key(int keycode, t_data *data)
 	}
 	else if (keycode == 2)
 	{
-		while (tmp->mlx_img != data->dementor)
+		while (old_pos->mlx_img != data->dementor)
 		{
-			tmp = tmp->next;
+			old_pos = old_pos->next;
 		}
-		old_pos = tmp;
-		tmp = tmp->next;
+		tmp = old_pos->next;
 		if (tmp->mlx_img != data->fence && tmp->mlx_img != data->ex && tmp->mlx_img != data->enemy)
 		{
 			mlx_put_image_to_window(data->mlx, data->win, data->background, old_pos->x, old_pos->y);
@@ -452,18 +469,13 @@ int	ft_key(int keycode, t_data *data)
 	}
 	else if (keycode == 13)
 	{
-		while (tmp->mlx_img != data->dementor)
+		while (old_pos->mlx_img != data->dementor)
+			old_pos = old_pos->next;
+		tmp = old_pos;
+		while (i < data->map_width)
 		{
-			tmp = tmp->next;
+			tmp = tmp->prev;
 			i++;
-		}
-		old_pos = tmp;
-		i = i - data->map_width;
-		tmp = data->images;
-		while (i > 0)
-		{
-			tmp = tmp->next;
-			i--;
 		}
 		if (tmp->mlx_img != data->fence && tmp->mlx_img != data->ex && tmp->mlx_img != data->enemy)
 		{
