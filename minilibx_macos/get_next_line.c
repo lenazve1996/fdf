@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_next_line.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ayajirob <ayajirob@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ayajirob@student.42.fr <ayajirob>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/04 18:45:45 by ayajirob          #+#    #+#             */
-/*   Updated: 2021/12/04 19:16:13 by ayajirob         ###   ########.fr       */
+/*   Updated: 2021/12/28 20:16:18 by ayajirob@st      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ int	ft_strchr_int(const char *s, int c)
 	return (-1);
 }
 
-char	*ft_reading(char *buffer, int fd)
+char	*ft_reading_smh(char *buffer, int fd)
 {
 	int	read_result;
 
@@ -102,7 +102,7 @@ char	*get_next_line(int fd)
 		return (NULL);
 	line = NULL;
 	if (buffer[fd] == NULL)
-		buffer[fd] = ft_reading(buffer[fd], fd);
+		buffer[fd] = ft_reading_smh(buffer[fd], fd);
 	if (buffer[fd] == NULL)
 		return (NULL);
 	index = ft_strchr_int(buffer[fd], '\n');

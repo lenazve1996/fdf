@@ -6,7 +6,7 @@
 /*   By: ayajirob@student.42.fr <ayajirob>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/04 18:48:58 by ayajirob          #+#    #+#             */
-/*   Updated: 2021/12/26 19:54:20 by ayajirob@st      ###   ########.fr       */
+/*   Updated: 2021/12/28 20:16:00 by ayajirob@st      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ char	*ft_strjoin(char *s1, char *s2);
 char	*ft_substr_free(char *s, unsigned int start, size_t len);
 char	*ft_strdup(const char *s1);
 int		ft_strchr_int(const char *s, int c);
-char	*ft_reading(char *buffer, int fd);
+char	*ft_reading_smh(char *buffer, int fd);
 char	*ft_filling_line(char **buf, int fd, int index);
 char	**ft_split(char const *s, char c);
 char	*ft_substr(char const *s, unsigned int start, size_t len);
