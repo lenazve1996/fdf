@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   fdf.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ayajirob <ayajirob@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ayajirob@student.42.fr <ayajirob>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/28 20:17:18 by ayajirob@st       #+#    #+#             */
-/*   Updated: 2021/12/29 00:11:09 by ayajirob         ###   ########.fr       */
+/*   Updated: 2021/12/29 16:58:57 by ayajirob@st      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,8 @@ typedef struct s_img
 	void	*prev;
 }				t_img;
 
-typedef struct s_data{
+typedef struct s_data
+{
 	void	*wn;
 	void	*ml;
 	void	*fond;
@@ -49,17 +50,40 @@ typedef struct s_data{
 	t_img	*images;
 }				t_data;
 
+void ft_lstclear_list(t_img *lst)
+{
+    t_img *tmp;
+
+    while (lst != NULL)
+	{
+		tmp = lst;
+		lst = tmp->next;
+		free(tmp);
+	}
+}
+
 void	ft_cleaning(t_data *data)
 {
-	int s;
+	int	s;
 
 	s = 0;
+	printf("here\n");
 	while (s <= data->map_height)
 	{
 		free(data->map[s]);
 		s++;
 	}
-	// ft_lstclear_list(data->images);
+	free(data->map);
+	ft_lstclear_list(data->images);
+}
+
+void	ft_destroy_imgs(t_data *data)
+{
+	mlx_destroy_image(data->ml, data->fond);
+	mlx_destroy_image(data->ml, data->wall);
+	mlx_destroy_image(data->ml, data->plr);
+	mlx_destroy_image(data->ml, data->harry);
+	mlx_destroy_image(data->ml, data->ex);
 }
 
 void	ft_error_inmap_read(char *line, char *tmp, char *str)
@@ -69,18 +93,6 @@ void	ft_error_inmap_read(char *line, char *tmp, char *str)
 		free(tmp);
 	perror(str);
 }
-
-// void ft_lstclear_list(t_img *lst)
-// {
-//     t_img *tmp;
-
-//     while(lst != NULL)
-//     {
-//         tmp = lst;
-//         lst = tmp->next;
-// 		free(tmp);
-//     }
-// }
 
 void	ft_lstadd_front(t_img **lst, t_img *new)
 {
@@ -154,6 +166,7 @@ int	ft_win_and_images_creation(t_data *data)
 
 	h = &data->im_hei;
 	w = &data->im_wid;
+	data->ml = mlx_init();
 	data->map_wid_pix = data->map_width * data->im_wid;
 	data->map_hei_pix = data->map_height * data->im_hei;
 	data->wn = mlx_new_window(data->ml, data->map_wid_pix, \
@@ -210,7 +223,7 @@ int	ft_put_walls(int s, int c, t_data *data)
 
 	x = c * data->im_wid;
 	y = s * data->im_hei;
-	mlx_put_image_to_window(data->ml, data->wn, data->fond , x, y);
+	mlx_put_image_to_window(data->ml, data->wn, data->fond, x, y);
 	mlx_put_image_to_window(data->ml, data->wn, data->wall, x, y);
 	if (s == 0 && c == 0)
 	{
@@ -312,7 +325,7 @@ char	*ft_map_read(int fd)
 	int		n;
 
 	n = 1;
-	line = (char *)malloc(2 * sizeof(char));
+	line = malloc(2 * sizeof(char));
 	if (line == NULL)
 	{
 		perror("Error\nMalloc failed");
@@ -330,15 +343,16 @@ char	*ft_map_read(int fd)
 	return (line);
 }
 
-int	ft_player_lose(t_img *new_p, t_data *data)
+void	ft_player_lose(t_img *new_p, t_data *data)
 {
 	mlx_put_image_to_window(data->ml, data->wn, data->plr, new_p->x, new_p->y);
 	new_p->img = data->plr;
+	ft_destroy_imgs(data);
 	mlx_destroy_window(data->ml, data->wn);
 	++data->movements;
 	printf("%d\n", data->movements);
 	ft_cleaning(data);
-	exit (0);
+	exit(0);
 }
 
 void	ft_return_exit(t_img *old_p, t_data *data)
@@ -378,6 +392,7 @@ void	ft_player_move_to_exit(t_img *old_p, t_img *new_p, t_data *data)
 	{
 		++data->movements;
 		printf("%d\n", data->movements);
+		ft_destroy_imgs(data);
 		mlx_destroy_window(data->ml, data->wn);
 		ft_cleaning(data);
 		exit(0);
@@ -385,7 +400,7 @@ void	ft_player_move_to_exit(t_img *old_p, t_img *new_p, t_data *data)
 	++data->movements;
 }
 
-int	ft_move_processing(t_img *old_p, t_img *new_p, t_data *data)
+void	ft_move_processing(t_img *old_p, t_img *new_p, t_data *data)
 {
 	char	*moves;
 
@@ -393,7 +408,7 @@ int	ft_move_processing(t_img *old_p, t_img *new_p, t_data *data)
 	&& new_p->img != data->enemy)
 		ft_move_player(old_p, new_p, data);
 	if (new_p->img == data->enemy)
-		return (ft_player_lose(new_p, data));
+		ft_player_lose(new_p, data);
 	else if (new_p->img == data->ex)
 		ft_player_move_to_exit(old_p, new_p, data);
 	printf("%d\n", data->movements);
@@ -401,7 +416,6 @@ int	ft_move_processing(t_img *old_p, t_img *new_p, t_data *data)
 	moves = ft_itoa(data->movements);
 	mlx_string_put(data->ml, data->wn, 24, 24, 0x00FF0000, moves);
 	free(moves);
-	return (0);
 }
 
 t_img	*ft_locate_new_pos(t_data *data, int keycode, t_img *old_p)
@@ -443,18 +457,13 @@ int	ft_key(int keycode, t_data *data)
 		while (old_p->img != data->plr)
 			old_p = old_p->next;
 		new_p = ft_locate_new_pos(data, keycode, old_p);
-		if (ft_move_processing(old_p, new_p, data) == 1)
-			return (1);
+		ft_move_processing(old_p, new_p, data);
 	}
 	else if (keycode == 53)
 	{
-		//mlx_destroy_image(data->ml, data->fond);
-		//mlx_destroy_image(data->ml, data->wall);
-		//mlx_destroy_image(data->ml, data->player);
-		//mlx_destroy_image(data->ml, data->harry);
-		//mlx_destroy_image(data->ml, data->ex);
-		mlx_destroy_window(data->ml, data->wn);
 		ft_cleaning(data);
+		ft_destroy_imgs(data);
+		mlx_destroy_window(data->ml, data->wn);
 		exit(0);
 	}
 	return (0);
@@ -531,6 +540,7 @@ int	ft_map_validation(char **map, t_data *data)
 
 int	ft_destroy(t_data *data)
 {
+	ft_destroy_imgs(data);
 	mlx_destroy_window(data->ml, data->wn);
 	ft_cleaning(data);
 	exit(0);
@@ -539,7 +549,6 @@ int	ft_destroy(t_data *data)
 int	ft_parser(char	**argv, t_data *data)
 {
 	int		fd;
-	char	**map;
 	char	*line;
 
 	data->movements = 0;
@@ -552,16 +561,16 @@ int	ft_parser(char	**argv, t_data *data)
 	line = ft_map_read(fd);
 	if (line == NULL)
 		return (1);
-	map = ft_split(line, '\n');
-	data->map = map;
-	if (map == NULL)
+	close(fd);
+	data->map = ft_split(line, '\n');
+	if (data->map == NULL)
 	{
 		free(line);
 		return (1);
 	}
 	free(line);
-	if (ft_map_validation(map, data) == 1 || \
-	ft_win_and_images_creation(data) == 1 || ft_fill_window(map, data) == 1)
+	if (ft_map_validation(data->map, data) == 1 || \
+	ft_win_and_images_creation(data) == 1 || ft_fill_window(data->map, data) == 1)
 		return (1);
 	return (0);
 }
@@ -576,7 +585,6 @@ int	main(int argc, char **argv)
 		return (ft_putstr_fd_ret("The number of arguments should be 1: file with a map\
 		with the .ber extension\n", 2));
 	}
-	data.ml = mlx_init();
 	data.im_wid = 64;
 	data.im_hei = 64;
 	if (!data.ml)
@@ -584,6 +592,8 @@ int	main(int argc, char **argv)
 	parser_result = ft_parser(argv, &data);
 	if (parser_result == 1)
 	{
+		//ft_destroy_imgs(&data);
+		//mlx_destroy_window(&data);
 		ft_cleaning(&data);
 		return (1);
 	}
@@ -591,5 +601,4 @@ int	main(int argc, char **argv)
 	mlx_key_hook(data.wn, ft_key, &data);
 	mlx_hook(data.wn, 17, (1L << 17), ft_destroy, &data);
 	mlx_loop(data.ml);
-	return (0);
 }
