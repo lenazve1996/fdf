@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   fdf.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ayajirob@student.42.fr <ayajirob>          +#+  +:+       +#+        */
+/*   By: ayajirob <ayajirob@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/28 20:17:18 by ayajirob@st       #+#    #+#             */
-/*   Updated: 2021/12/29 16:58:57 by ayajirob@st      ###   ########.fr       */
+/*   Updated: 2022/01/06 00:39:27 by ayajirob         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -575,6 +575,59 @@ int	ft_parser(char	**argv, t_data *data)
 	return (0);
 }
 
+int	ft_animation(t_data *data)
+{
+	static int	i;
+	t_img		*old_p;
+
+	old_p = data->images;
+	while (old_p->img != data->plr)
+		old_p = old_p->next;
+	if (i % 2 == 0)
+	{
+		mlx_put_image_to_window(data->ml, data->wn, data->fond, old_p->x, old_p->y);
+		mlx_put_image_to_window(data->ml, data->wn, data->harry, old_p->x, old_p->y);
+		// old_p->img = data->plr2;
+	}
+	else 
+	{
+		mlx_put_image_to_window(data->ml, data->wn, data->fond, old_p->x, old_p->y);
+		mlx_put_image_to_window(data->ml, data->wn, data->plr, old_p->x, old_p->y);
+		// old_p->img = data->plr;	
+	}
+	i++;
+	return (0);
+}
+
+int	ft_patrols(t_data *data)
+{
+	static int	n;
+	t_img		*old_p;
+	t_img		*new_p;
+
+	old_p = data->images;
+	while (old_p->img != data->enemy)
+		old_p = old_p->next;
+	if (n % 2 == 0)
+	{
+		new_p = old_p->next;
+		mlx_put_image_to_window(data->ml, data->wn, data->fond, old_p->x, old_p->y);
+		old_p->img = data->fond;
+		mlx_put_image_to_window(data->ml, data->wn, data->enemy, new_p->x, new_p->y);
+		new_p->img = data->enemy;
+	}
+	else 
+	{
+		new_p = old_p->prev;
+		mlx_put_image_to_window(data->ml, data->wn, data->fond, old_p->x, old_p->y);
+		old_p->img = data->fond;
+		mlx_put_image_to_window(data->ml, data->wn, data->enemy, new_p->x, new_p->y);
+		new_p->img = data->enemy;
+	}
+	n++;
+	return (0);
+}
+
 int	main(int argc, char **argv)
 {
 	t_data	data;
@@ -592,13 +645,15 @@ int	main(int argc, char **argv)
 	parser_result = ft_parser(argv, &data);
 	if (parser_result == 1)
 	{
-		//ft_destroy_imgs(&data);
-		//mlx_destroy_window(&data);
+		ft_destroy_imgs(&data);
+		mlx_destroy_window(data.ml, data.wn);
 		ft_cleaning(&data);
 		return (1);
 	}
 	data.images->return_exit = 0;
 	mlx_key_hook(data.wn, ft_key, &data);
 	mlx_hook(data.wn, 17, (1L << 17), ft_destroy, &data);
+	mlx_loop_hook(data.ml, ft_animation, &data);
+	mlx_loop_hook(data.ml, ft_patrols, &data);
 	mlx_loop(data.ml);
 }
