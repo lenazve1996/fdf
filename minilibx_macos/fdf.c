@@ -6,7 +6,7 @@
 /*   By: ayajirob <ayajirob@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/28 20:17:18 by ayajirob@st       #+#    #+#             */
-/*   Updated: 2022/01/06 00:39:27 by ayajirob         ###   ########.fr       */
+/*   Updated: 2022/01/16 14:10:40 by ayajirob         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -602,29 +602,41 @@ int	ft_animation(t_data *data)
 int	ft_patrols(t_data *data)
 {
 	static int	n;
+	int			i;
+	//static int	direction;
 	t_img		*old_p;
 	t_img		*new_p;
 
+	i = 1;
 	old_p = data->images;
 	while (old_p->img != data->enemy)
 		old_p = old_p->next;
-	if (n % 2 == 0)
+	if (n % 10000 == 0)
 	{
 		new_p = old_p->next;
+		if (new_p->img == data->wall || new_p->img == data->harry || new_p->img == data->ex)
+		{
+			while (i < data->map_width)
+			{
+				new_p  = new_p->next;
+				i++;
+			}
+		}
 		mlx_put_image_to_window(data->ml, data->wn, data->fond, old_p->x, old_p->y);
 		old_p->img = data->fond;
 		mlx_put_image_to_window(data->ml, data->wn, data->enemy, new_p->x, new_p->y);
 		new_p->img = data->enemy;
 	}
-	else 
-	{
-		new_p = old_p->prev;
-		mlx_put_image_to_window(data->ml, data->wn, data->fond, old_p->x, old_p->y);
-		old_p->img = data->fond;
-		mlx_put_image_to_window(data->ml, data->wn, data->enemy, new_p->x, new_p->y);
-		new_p->img = data->enemy;
-	}
+	// else if (n % 5000 == 0)
+	// {
+	// 	new_p = old_p->prev;
+	// 	mlx_put_image_to_window(data->ml, data->wn, data->fond, old_p->x, old_p->y);
+	// 	old_p->img = data->fond;
+	// 	mlx_put_image_to_window(data->ml, data->wn, data->enemy, new_p->x, new_p->y);
+	// 	new_p->img = data->enemy;
+	// }
 	n++;
+	printf("%d\n", n);
 	return (0);
 }
 
@@ -651,9 +663,11 @@ int	main(int argc, char **argv)
 		return (1);
 	}
 	data.images->return_exit = 0;
-	mlx_key_hook(data.wn, ft_key, &data);
-	mlx_hook(data.wn, 17, (1L << 17), ft_destroy, &data);
 	mlx_loop_hook(data.ml, ft_animation, &data);
 	mlx_loop_hook(data.ml, ft_patrols, &data);
+	mlx_key_hook(data.wn, ft_key, &data);
+	mlx_hook(data.wn, 17, (1L << 17), ft_destroy, &data);
+	// mlx_loop_hook(data.ml, ft_animation, &data);
+	// mlx_loop_hook(data.ml, ft_patrols, &data);
 	mlx_loop(data.ml);
 }
