@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   fdf.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ayajirob <ayajirob@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ayajirob@student.42.fr <ayajirob>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/28 20:17:18 by ayajirob@st       #+#    #+#             */
-/*   Updated: 2022/01/16 14:10:40 by ayajirob         ###   ########.fr       */
+/*   Updated: 2022/01/17 18:58:53 by ayajirob@st      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,10 @@ typedef struct s_data
 	void	*ex;
 	void	*plr;
 	void	*enemy;
+	void	*enemy2;
+	void	*enemy3;
 	char	**map;
+	int		direction;
 	int		tmp_str;
 	int		tmp_c;
 	int		movements;
@@ -50,11 +53,11 @@ typedef struct s_data
 	t_img	*images;
 }				t_data;
 
-void ft_lstclear_list(t_img *lst)
+void	ft_lstclear_list(t_img *lst)
 {
-    t_img *tmp;
+	t_img	*tmp;
 
-    while (lst != NULL)
+	while (lst != NULL)
 	{
 		tmp = lst;
 		lst = tmp->next;
@@ -159,7 +162,7 @@ char	*ft_strchr(const char *s, int c)
 	return (NULL);
 }
 
-int	ft_win_and_images_creation(t_data *data)
+int	ft_win_and_img_creation(t_data *data)
 {
 	int	*h;
 	int	*w;
@@ -167,10 +170,8 @@ int	ft_win_and_images_creation(t_data *data)
 	h = &data->im_hei;
 	w = &data->im_wid;
 	data->ml = mlx_init();
-	data->map_wid_pix = data->map_width * data->im_wid;
-	data->map_hei_pix = data->map_height * data->im_hei;
-	data->wn = mlx_new_window(data->ml, data->map_wid_pix, \
-	data->map_hei_pix, "so_long");
+	data->wn = mlx_new_window(data->ml, data->map_width * data->im_wid, \
+	data->map_height * data->im_hei, "so_long");
 	if (!data->wn)
 	{
 		perror("Failed to open a new window");
@@ -182,6 +183,8 @@ int	ft_win_and_images_creation(t_data *data)
 	data->ex = mlx_xpm_file_to_image(data->ml, "exit.xpm", h, w);
 	data->plr = mlx_xpm_file_to_image(data->ml, "dem2.xpm", h, w);
 	data->enemy = mlx_xpm_file_to_image(data->ml, "phoenix.xpm", h, w);
+	data->enemy2 = mlx_xpm_file_to_image(data->ml, "phoenix2.xpm", h, w);
+	data->enemy3 = mlx_xpm_file_to_image(data->ml, "phoenix3.xpm", h, w);
 	if (data->wall == NULL || data->fond == NULL || data->harry == NULL || \
 	data->ex == NULL || data->plr == NULL || data->enemy == NULL)
 		return (ft_putstr_fd_ret("Error\nmlx_xpm_file_to_image failed\n", 2));
@@ -231,7 +234,7 @@ int	ft_put_walls(int s, int c, t_data *data)
 		if (data->images == NULL)
 			return (1);
 		moves = ft_itoa(data->movements);
-		mlx_string_put(data->ml, data->wn, 24, 24, 0x00FF0000, moves);
+		mlx_string_put(data->ml, data->wn, 48, 24, 0x00FF0000, moves);
 		free(moves);
 	}
 	else
@@ -414,7 +417,7 @@ void	ft_move_processing(t_img *old_p, t_img *new_p, t_data *data)
 	printf("%d\n", data->movements);
 	mlx_put_image_to_window(data->ml, data->wn, data->wall, 0, 0);
 	moves = ft_itoa(data->movements);
-	mlx_string_put(data->ml, data->wn, 24, 24, 0x00FF0000, moves);
+	mlx_string_put(data->ml, data->wn, 48, 24, 0x00FF0000, moves);
 	free(moves);
 }
 
@@ -489,7 +492,7 @@ int	ft_check_characters(char **map, t_data *data)
 		if (ft_strchr(map[i], 'E') != NULL)
 			ex++;
 		if (i >= 1 && (int)ft_strlen(map[i]) != data->map_width)
-			return (ft_putstr_fd_ret("Error\nDifferent line sizes in map\n", 2));
+			return (ft_putstr_fd_ret("Error\nDifferent str sizes in map\n", 2));
 		i++;
 	}
 	if ((collectible == 0) || (player == 0) || (ex == 0))
@@ -570,73 +573,89 @@ int	ft_parser(char	**argv, t_data *data)
 	}
 	free(line);
 	if (ft_map_validation(data->map, data) == 1 || \
-	ft_win_and_images_creation(data) == 1 || ft_fill_window(data->map, data) == 1)
+	ft_win_and_img_creation(data) == 1 || ft_fill_window(data->map, data) == 1)
 		return (1);
 	return (0);
 }
 
-int	ft_animation(t_data *data)
+int	ft_check_enemy_direction(t_img *new_p, t_data *data)
 {
-	static int	i;
-	t_img		*old_p;
-
-	old_p = data->images;
-	while (old_p->img != data->plr)
-		old_p = old_p->next;
-	if (i % 2 == 0)
+	if ((new_p->img == data->wall || new_p->img == data->harry || \
+	new_p->img == data->ex) && (data->direction == 2 || data->direction == 1))
 	{
-		mlx_put_image_to_window(data->ml, data->wn, data->fond, old_p->x, old_p->y);
-		mlx_put_image_to_window(data->ml, data->wn, data->harry, old_p->x, old_p->y);
-		// old_p->img = data->plr2;
+		data->direction = data->direction - 1;
+		return (1);
 	}
-	else 
+	else if (((new_p->img == data->wall || new_p->img == data->harry || \
+	new_p->img == data->ex) && data->direction == 0))
 	{
-		mlx_put_image_to_window(data->ml, data->wn, data->fond, old_p->x, old_p->y);
-		mlx_put_image_to_window(data->ml, data->wn, data->plr, old_p->x, old_p->y);
-		// old_p->img = data->plr;	
+		data->direction = 13;
+		return (1);
 	}
-	i++;
+	else if ((new_p->img == data->wall || new_p->img == data->harry || \
+	new_p->img == data->ex) && data->direction == 13)
+	{
+		data->direction = 2;
+		return (1);
+	}
+	else if (new_p->img == data->plr)
+		ft_player_lose(new_p, data);
 	return (0);
+}
+
+t_img	*ft_set_enemy_direction(t_data *data, t_img *old_p)
+{
+	int		check;
+	t_img	*new_p;
+
+	while (check != 0)
+	{
+		new_p = ft_locate_new_pos(data, data->direction, old_p);
+		check = ft_check_enemy_direction(new_p, data);
+	}
+	return (new_p);
+}
+
+void	ft_move_enemy(t_data *data, t_img *old_p)
+{
+	t_img	*new;
+
+	new = ft_set_enemy_direction(data, old_p);
+	mlx_put_image_to_window(data->ml, data->wn, data->fond, old_p->x, old_p->y);
+	old_p->img = data->fond;
+	mlx_put_image_to_window(data->ml, data->wn, data->enemy, new->x, new->y);
+	new->img = data->enemy;
+}
+
+void	ft_put_img_to_fond(t_data *data, void *character, t_img *pos)
+{
+	mlx_put_image_to_window(data->ml, data->wn, data->fond, pos->x, pos->y);
+	mlx_put_image_to_window(data->ml, data->wn, character, pos->x, pos->y);
 }
 
 int	ft_patrols(t_data *data)
 {
 	static int	n;
 	int			i;
-	//static int	direction;
+	int			check;
 	t_img		*old_p;
 	t_img		*new_p;
 
-	i = 1;
+	check = 1;
 	old_p = data->images;
 	while (old_p->img != data->enemy)
 		old_p = old_p->next;
-	if (n % 10000 == 0)
-	{
-		new_p = old_p->next;
-		if (new_p->img == data->wall || new_p->img == data->harry || new_p->img == data->ex)
-		{
-			while (i < data->map_width)
-			{
-				new_p  = new_p->next;
-				i++;
-			}
-		}
-		mlx_put_image_to_window(data->ml, data->wn, data->fond, old_p->x, old_p->y);
-		old_p->img = data->fond;
-		mlx_put_image_to_window(data->ml, data->wn, data->enemy, new_p->x, new_p->y);
-		new_p->img = data->enemy;
-	}
-	// else if (n % 5000 == 0)
-	// {
-	// 	new_p = old_p->prev;
-	// 	mlx_put_image_to_window(data->ml, data->wn, data->fond, old_p->x, old_p->y);
-	// 	old_p->img = data->fond;
-	// 	mlx_put_image_to_window(data->ml, data->wn, data->enemy, new_p->x, new_p->y);
-	// 	new_p->img = data->enemy;
-	// }
+	if (n % 12000 == 0)
+		ft_move_enemy(data, old_p);
+	else if (n % 12000 == 2000)
+		ft_put_img_to_fond(data, data->enemy2, old_p);
+	else if (n % 12000 == 4000)
+		ft_put_img_to_fond(data, data->enemy3, old_p);
+	else if (n % 12000 == 8000)
+		ft_put_img_to_fond(data, data->enemy2, old_p);
+	else if (n % 12000 == 10000)
+		ft_put_img_to_fond(data, data->enemy, old_p);
 	n++;
-	printf("%d\n", n);
 	return (0);
 }
 
@@ -663,11 +682,9 @@ int	main(int argc, char **argv)
 		return (1);
 	}
 	data.images->return_exit = 0;
-	mlx_loop_hook(data.ml, ft_animation, &data);
+	data.direction = 2;
 	mlx_loop_hook(data.ml, ft_patrols, &data);
 	mlx_key_hook(data.wn, ft_key, &data);
 	mlx_hook(data.wn, 17, (1L << 17), ft_destroy, &data);
-	// mlx_loop_hook(data.ml, ft_animation, &data);
-	// mlx_loop_hook(data.ml, ft_patrols, &data);
 	mlx_loop(data.ml);
 }
