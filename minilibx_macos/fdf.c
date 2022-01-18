@@ -6,7 +6,7 @@
 /*   By: ayajirob@student.42.fr <ayajirob>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/28 20:17:18 by ayajirob@st       #+#    #+#             */
-/*   Updated: 2022/01/18 15:18:55 by ayajirob@st      ###   ########.fr       */
+/*   Updated: 2022/01/18 19:39:39 by ayajirob@st      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ typedef struct s_img
 	int		y;
 	void	*next;
 	void	*prev;
+	int		direction;
 }				t_img;
 
 typedef struct s_data
@@ -41,7 +42,6 @@ typedef struct s_data
 	void	*enemy2;
 	void	*enemy3;
 	char	**map;
-	int		direction;
 	int		tmp_str;
 	int		tmp_c;
 	int		movements;
@@ -83,11 +83,14 @@ void	ft_cleaning(t_data *data)
 
 void	ft_destroy_imgs(t_data *data)
 {
-	mlx_destroy_image(data->ml, data->fond);
-	mlx_destroy_image(data->ml, data->wall);
-	mlx_destroy_image(data->ml, data->plr);
-	mlx_destroy_image(data->ml, data->harry);
-	mlx_destroy_image(data->ml, data->ex);
+	if (data->ml != NULL)
+	{
+		mlx_destroy_image(data->ml, data->fond);
+		mlx_destroy_image(data->ml, data->wall);
+		mlx_destroy_image(data->ml, data->plr);
+		mlx_destroy_image(data->ml, data->harry);
+		mlx_destroy_image(data->ml, data->ex);
+	}
 }
 
 void	ft_put_img_to_fond(t_data *data, void *character, int x, int y)
@@ -137,6 +140,7 @@ t_img	*ft_lstnew(void	*img, int n, int j)
 	new_element->y = j;
 	new_element->next = NULL;
 	new_element->prev = NULL;
+	new_element->direction = 2;
 	return (new_element);
 }
 
@@ -177,6 +181,8 @@ int	ft_win_and_img_creation(t_data *data)
 	h = &data->im_hei;
 	w = &data->im_wid;
 	data->ml = mlx_init();
+	if (!data->ml)
+		return (ft_putstr_fd_ret("Error\nFailed to set up the connection", 2));
 	data->wn = mlx_new_window(data->ml, data->map_width * data->im_wid, \
 	data->map_height * data->im_hei, "so_long");
 	if (!data->wn)
@@ -360,7 +366,6 @@ void	ft_player_lose(t_img *new_p, t_data *data)
 	new_p->img = data->plr;
 	ft_destroy_imgs(data);
 	mlx_destroy_window(data->ml, data->wn);
-	++data->movements;
 	printf("%d\n", data->movements);
 	ft_cleaning(data);
 	exit(0);
@@ -419,13 +424,17 @@ void	ft_move_processing(t_img *old_p, t_img *new_p, t_data *data)
 	&& new_p->img != data->enemy)
 		ft_move_player(old_p, new_p, data);
 	if (new_p->img == data->enemy)
+	{
+		++data->movements;
 		ft_player_lose(new_p, data);
+	}
 	else if (new_p->img == data->ex)
 		ft_player_move_to_exit(old_p, new_p, data);
 	printf("%d\n", data->movements);
 	mlx_put_image_to_window(data->ml, data->wn, data->wall, 0, 0);
 	moves = ft_itoa(data->movements);
 	ft_put_img_to_fond(data, data->wall, 0, 0);
+	ft_put_img_to_fond(data, data->wall, 64, 0);
 	mlx_string_put(data->ml, data->wn, 44, 24, 0x00000000, moves);
 	free(moves);
 }
@@ -506,7 +515,7 @@ int	ft_check_characters(char **map, t_data *data)
 			return (ft_putstr_fd_ret("Error\nDifferent str sizes in map\n", 2));
 		i++;
 	}
-	if ((collectible == 0) || (player == 0) || (ex == 0))
+	if ((collectible == 0) || (player != 1) || (ex == 0))
 		return (ft_putstr_fd_ret("Error\nThe map is not valid\n", 2));
 	return (0);
 }
@@ -592,7 +601,7 @@ int	ft_parser(char	**argv, t_data *data)
 int	ft_check_enemy_direction(t_img *new_p, t_data *data)
 {
 	if (new_p->img == data->wall || new_p->img == data->harry || \
-	new_p->img == data->ex)
+	new_p->img == data->ex || new_p->img == data->enemy)
 		return (1);
 	else if (new_p->img == data->plr)
 		ft_player_lose(new_p, data);
@@ -603,24 +612,32 @@ t_img	*ft_set_enemy_direction(t_data *data, t_img *old_p)
 {
 	int		check;
 	t_img	*new_p;
+	int		i;
+	int		n;
+	int		direction;
+	int		array_direct[4];
 
-	new_p = ft_locate_new_pos(data, 2, old_p);
-	check = ft_check_enemy_direction(new_p, data);
-	if (check == 1)
+	i = 0;
+	n = 0;
+	array_direct[0] = 1;
+	array_direct[1] = 13;
+	array_direct[2] = 0;
+	array_direct[3] = 2;
+	
+	while (check != 0 && n != 4)
 	{
-		new_p = ft_locate_new_pos(data, 1, old_p);
+		if (i == 0)
+			direction = old_p->direction;
+		else
+			direction = array_direct[n++];
+		new_p = ft_locate_new_pos(data, direction, old_p);
 		check = ft_check_enemy_direction(new_p, data);
+		i++;
 	}
-	if (check == 1)
-	{
-		new_p = ft_locate_new_pos(data, 0, old_p);
-		check = ft_check_enemy_direction(new_p, data);
-	}
-	if (check == 1)
-	{
-		new_p = ft_locate_new_pos(data, 0, old_p);
-		check = ft_check_enemy_direction(new_p, data);
-	}
+	if (n == 4)
+		new_p = old_p;
+	else
+		new_p->direction = direction;
 	return (new_p);
 }
 
@@ -635,52 +652,68 @@ void	ft_move_enemy(t_data *data, t_img *old_p)
 	new->img = data->enemy;
 }
 
-int	ft_patrols(t_data *data)
+t_img	*ft_find_enemy(t_data *data, int n)
 {
-	static int	n;
-	int			i;
-	int			check;
-	t_img		*old_p;
-	//t_img		*new_p;
-
-	check = 1;
-	i = 0;
+	t_img	*old_p;
+	
 	old_p = data->images;
-	while (i < data->enemy_numb)
+	while (old_p->img != data->enemy)
+		old_p = old_p->next;
+	while (n != 0)
+	{
+		old_p = old_p->next;
+		while (old_p->img != data->enemy)
+			old_p = old_p->next;
+		n--;
+	}
+	return (old_p);
+}
+
+int ft_patrols(t_data *data)
+{
+	int			i;
+	int			n;
+	t_img		*old_p;
+	static int	c;
+	
+	i = 0;
+	n = 0;
+	old_p = data->images;
+	while (i <= data->enemy_numb)
 	{
 		while (old_p->img != data->enemy)
 			old_p = old_p->next;
-		if (n % 12000 == 0)
-		{
-			ft_move_enemy(data, old_p);
-			printf("here5\n");
-		}
-		else if (n % 12000 == 2000)
-		{
+		if (c % 6000 == 1000)
 			ft_put_img_to_fond(data, data->enemy2, old_p->x, old_p->y);
-			printf("here1\n");
-		}
-		else if (n % 12000 == 4000)
-		{
+		else if (c % 6000 == 2000)
 			ft_put_img_to_fond(data, data->enemy3, old_p->x, old_p->y);
-			printf("here2\n");
-		}
-		else if (n % 12000 == 8000)
-		{
+		else if (c % 6000 == 3000)
 			ft_put_img_to_fond(data, data->enemy2, old_p->x, old_p->y);
-			printf("here3\n");
-		}
-		else if (n % 12000 == 10000)
-		{
+		else if (c % 6000 == 4000)
 			ft_put_img_to_fond(data, data->enemy, old_p->x, old_p->y);
-			printf("here4\n");
-		}
 		i++;
 		old_p = old_p->next;
 	}
-	n++;
+	while (n <= data->enemy_numb)
+	{
+		old_p = ft_find_enemy(data, n);
+		if (c % 6000 == n * 150)
+			ft_move_enemy(data, old_p);
+		n++;
+	}
+	c++;
 	return (0);
-}
+	//while (i < data->enemy_numb)
+	//{
+	//	while (old_p->img != data->enemy)
+	//		old_p = old_p->next;
+	//	if (c % 2500 == 0)
+	//	{
+	//		ft_move_enemy(data, old_p);
+	//		printf("here5\n");
+	//	}
+	//}
+}	
 
 int	main(int argc, char **argv)
 {
@@ -694,18 +727,19 @@ int	main(int argc, char **argv)
 	}
 	data.im_wid = 64;
 	data.im_hei = 64;
-	if (!data.ml)
-		return (ft_putstr_fd_ret("Error\nFailed to set up the connection", 2));
+	data.ml = NULL;
 	parser_result = ft_parser(argv, &data);
 	if (parser_result == 1)
 	{
-		ft_destroy_imgs(&data);
-		mlx_destroy_window(data.ml, data.wn);
+		if (data.ml != NULL)
+		{
+			ft_destroy_imgs(&data);
+			mlx_destroy_window(data.ml, data.wn);
+		}
 		ft_cleaning(&data);
 		return (1);
 	}
 	data.images->return_exit = 0;
-	data.direction = 2;
 	mlx_loop_hook(data.ml, ft_patrols, &data);
 	mlx_key_hook(data.wn, ft_key, &data);
 	mlx_hook(data.wn, 17, (1L << 17), ft_destroy, &data);
