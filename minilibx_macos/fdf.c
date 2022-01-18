@@ -6,7 +6,7 @@
 /*   By: ayajirob@student.42.fr <ayajirob>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/28 20:17:18 by ayajirob@st       #+#    #+#             */
-/*   Updated: 2022/01/17 18:58:53 by ayajirob@st      ###   ########.fr       */
+/*   Updated: 2022/01/18 15:18:55 by ayajirob@st      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "get_next_line.h"
+#include <pthread.h>
 
 typedef struct s_img
 {
@@ -50,6 +51,7 @@ typedef struct s_data
 	int		map_wid_pix;
 	int		map_height;
 	int		map_hei_pix;
+	int		enemy_numb;
 	t_img	*images;
 }				t_data;
 
@@ -70,7 +72,6 @@ void	ft_cleaning(t_data *data)
 	int	s;
 
 	s = 0;
-	printf("here\n");
 	while (s <= data->map_height)
 	{
 		free(data->map[s]);
@@ -87,6 +88,12 @@ void	ft_destroy_imgs(t_data *data)
 	mlx_destroy_image(data->ml, data->plr);
 	mlx_destroy_image(data->ml, data->harry);
 	mlx_destroy_image(data->ml, data->ex);
+}
+
+void	ft_put_img_to_fond(t_data *data, void *character, int x, int y)
+{
+	mlx_put_image_to_window(data->ml, data->wn, data->fond, x, y);
+	mlx_put_image_to_window(data->ml, data->wn, character, x, y);
 }
 
 void	ft_error_inmap_read(char *line, char *tmp, char *str)
@@ -234,7 +241,8 @@ int	ft_put_walls(int s, int c, t_data *data)
 		if (data->images == NULL)
 			return (1);
 		moves = ft_itoa(data->movements);
-		mlx_string_put(data->ml, data->wn, 48, 24, 0x00FF0000, moves);
+		ft_put_img_to_fond(data, data->wall, 0, 0);
+		mlx_string_put(data->ml, data->wn, 44, 24, 0x00000000, moves);
 		free(moves);
 	}
 	else
@@ -417,7 +425,8 @@ void	ft_move_processing(t_img *old_p, t_img *new_p, t_data *data)
 	printf("%d\n", data->movements);
 	mlx_put_image_to_window(data->ml, data->wn, data->wall, 0, 0);
 	moves = ft_itoa(data->movements);
-	mlx_string_put(data->ml, data->wn, 48, 24, 0x00FF0000, moves);
+	ft_put_img_to_fond(data, data->wall, 0, 0);
+	mlx_string_put(data->ml, data->wn, 44, 24, 0x00000000, moves);
 	free(moves);
 }
 
@@ -453,7 +462,6 @@ int	ft_key(int keycode, t_data *data)
 	int		i;
 
 	i = 0;
-	printf("%d\n", keycode);
 	if (keycode == 0 || keycode == 1 || keycode == 2 || keycode == 13)
 	{
 		old_p = data->images;
@@ -483,6 +491,7 @@ int	ft_check_characters(char **map, t_data *data)
 	collectible = 0;
 	player = 0;
 	ex = 0;
+	data->enemy_numb = 0;
 	while (i < data->map_height)
 	{
 		if (ft_strchr(map[i], 'C') != NULL)
@@ -491,6 +500,8 @@ int	ft_check_characters(char **map, t_data *data)
 			player++;
 		if (ft_strchr(map[i], 'E') != NULL)
 			ex++;
+		if (ft_strchr(map[i], 'N') != NULL)
+			data->enemy_numb++;
 		if (i >= 1 && (int)ft_strlen(map[i]) != data->map_width)
 			return (ft_putstr_fd_ret("Error\nDifferent str sizes in map\n", 2));
 		i++;
@@ -580,24 +591,9 @@ int	ft_parser(char	**argv, t_data *data)
 
 int	ft_check_enemy_direction(t_img *new_p, t_data *data)
 {
-	if ((new_p->img == data->wall || new_p->img == data->harry || \
-	new_p->img == data->ex) && (data->direction == 2 || data->direction == 1))
-	{
-		data->direction = data->direction - 1;
+	if (new_p->img == data->wall || new_p->img == data->harry || \
+	new_p->img == data->ex)
 		return (1);
-	}
-	else if (((new_p->img == data->wall || new_p->img == data->harry || \
-	new_p->img == data->ex) && data->direction == 0))
-	{
-		data->direction = 13;
-		return (1);
-	}
-	else if ((new_p->img == data->wall || new_p->img == data->harry || \
-	new_p->img == data->ex) && data->direction == 13)
-	{
-		data->direction = 2;
-		return (1);
-	}
 	else if (new_p->img == data->plr)
 		ft_player_lose(new_p, data);
 	return (0);
@@ -608,9 +604,21 @@ t_img	*ft_set_enemy_direction(t_data *data, t_img *old_p)
 	int		check;
 	t_img	*new_p;
 
-	while (check != 0)
+	new_p = ft_locate_new_pos(data, 2, old_p);
+	check = ft_check_enemy_direction(new_p, data);
+	if (check == 1)
 	{
-		new_p = ft_locate_new_pos(data, data->direction, old_p);
+		new_p = ft_locate_new_pos(data, 1, old_p);
+		check = ft_check_enemy_direction(new_p, data);
+	}
+	if (check == 1)
+	{
+		new_p = ft_locate_new_pos(data, 0, old_p);
+		check = ft_check_enemy_direction(new_p, data);
+	}
+	if (check == 1)
+	{
+		new_p = ft_locate_new_pos(data, 0, old_p);
 		check = ft_check_enemy_direction(new_p, data);
 	}
 	return (new_p);
@@ -627,34 +635,49 @@ void	ft_move_enemy(t_data *data, t_img *old_p)
 	new->img = data->enemy;
 }
 
-void	ft_put_img_to_fond(t_data *data, void *character, t_img *pos)
-{
-	mlx_put_image_to_window(data->ml, data->wn, data->fond, pos->x, pos->y);
-	mlx_put_image_to_window(data->ml, data->wn, character, pos->x, pos->y);
-}
-
 int	ft_patrols(t_data *data)
 {
 	static int	n;
 	int			i;
 	int			check;
 	t_img		*old_p;
-	t_img		*new_p;
+	//t_img		*new_p;
 
 	check = 1;
+	i = 0;
 	old_p = data->images;
-	while (old_p->img != data->enemy)
+	while (i < data->enemy_numb)
+	{
+		while (old_p->img != data->enemy)
+			old_p = old_p->next;
+		if (n % 12000 == 0)
+		{
+			ft_move_enemy(data, old_p);
+			printf("here5\n");
+		}
+		else if (n % 12000 == 2000)
+		{
+			ft_put_img_to_fond(data, data->enemy2, old_p->x, old_p->y);
+			printf("here1\n");
+		}
+		else if (n % 12000 == 4000)
+		{
+			ft_put_img_to_fond(data, data->enemy3, old_p->x, old_p->y);
+			printf("here2\n");
+		}
+		else if (n % 12000 == 8000)
+		{
+			ft_put_img_to_fond(data, data->enemy2, old_p->x, old_p->y);
+			printf("here3\n");
+		}
+		else if (n % 12000 == 10000)
+		{
+			ft_put_img_to_fond(data, data->enemy, old_p->x, old_p->y);
+			printf("here4\n");
+		}
+		i++;
 		old_p = old_p->next;
-	if (n % 12000 == 0)
-		ft_move_enemy(data, old_p);
-	else if (n % 12000 == 2000)
-		ft_put_img_to_fond(data, data->enemy2, old_p);
-	else if (n % 12000 == 4000)
-		ft_put_img_to_fond(data, data->enemy3, old_p);
-	else if (n % 12000 == 8000)
-		ft_put_img_to_fond(data, data->enemy2, old_p);
-	else if (n % 12000 == 10000)
-		ft_put_img_to_fond(data, data->enemy, old_p);
+	}
 	n++;
 	return (0);
 }
@@ -666,8 +689,8 @@ int	main(int argc, char **argv)
 
 	if (argc != 2)
 	{
-		return (ft_putstr_fd_ret("The number of arguments should be 1: file with a map\
-		with the .ber extension\n", 2));
+		return (ft_putstr_fd_ret("The number of arguments should be 1: file \
+		with a map with the .ber extension\n", 2));
 	}
 	data.im_wid = 64;
 	data.im_hei = 64;
