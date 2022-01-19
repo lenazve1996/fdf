@@ -6,11 +6,11 @@
 /*   By: ayajirob@student.42.fr <ayajirob>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/05 15:43:37 by ayajirob          #+#    #+#             */
-/*   Updated: 2021/12/24 13:30:23 by ayajirob@st      ###   ########.fr       */
+/*   Updated: 2022/01/19 16:58:25 by ayajirob@st      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "so_long.h"
 
 static	int	ft_number_of_str(char const *s, char c)
 {
