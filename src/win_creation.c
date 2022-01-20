@@ -6,7 +6,7 @@
 /*   By: ayajirob@student.42.fr <ayajirob>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/20 11:56:11 by ayajirob@st       #+#    #+#             */
-/*   Updated: 2022/01/20 12:22:13 by ayajirob@st      ###   ########.fr       */
+/*   Updated: 2022/01/20 16:41:23 by ayajirob@st      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,14 +34,14 @@ int	ft_fill_window(char **map, t_data *data)
 
 static int	ft_imgs_creation(t_data *data, int *h, int *w)
 {
-	data->wall = mlx_xpm_file_to_image(data->ml, "tree.xpm", h, w);
-	data->fond = mlx_xpm_file_to_image(data->ml, "paper.xpm", h, w);
-	data->harry = mlx_xpm_file_to_image(data->ml, "harry.xpm", h, w);
-	data->ex = mlx_xpm_file_to_image(data->ml, "exit.xpm", h, w);
-	data->plr = mlx_xpm_file_to_image(data->ml, "dem2.xpm", h, w);
-	data->enemy = mlx_xpm_file_to_image(data->ml, "phoenix.xpm", h, w);
-	data->enemy2 = mlx_xpm_file_to_image(data->ml, "phoenix2.xpm", h, w);
-	data->enemy3 = mlx_xpm_file_to_image(data->ml, "phoenix3.xpm", h, w);
+	data->wall = mlx_xpm_file_to_image(data->ml, "./xpm/tree.xpm", h, w);
+	data->fond = mlx_xpm_file_to_image(data->ml, "./xpm/paper.xpm", h, w);
+	data->harry = mlx_xpm_file_to_image(data->ml, "./xpm/harry.xpm", h, w);
+	data->ex = mlx_xpm_file_to_image(data->ml, "./xpm/exit.xpm", h, w);
+	data->plr = mlx_xpm_file_to_image(data->ml, "./xpm/dem2.xpm", h, w);
+	data->enemy = mlx_xpm_file_to_image(data->ml, "./xpm/phoenix.xpm", h, w);
+	data->enemy2 = mlx_xpm_file_to_image(data->ml, "./xpm/phoenix2.xpm", h, w);
+	data->enemy3 = mlx_xpm_file_to_image(data->ml, "./xpm/phoenix3.xpm", h, w);
 	if (data->wall == NULL || data->fond == NULL || data->harry == NULL || \
 	data->ex == NULL || data->plr == NULL || data->enemy == NULL)
 		return (ft_putstr_fd_ret("Error\nmlx_xpm_file_to_image failed\n", 2));
