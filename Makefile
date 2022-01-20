@@ -1,17 +1,19 @@
 NAME = so_long
-CC = gcc -lmlx -framework OpenGL -framework AppKit -Wall -Wextra -Werror
+CC = cc
+FLAGS = -Wall -Wextra -Werror
 SRC = ft_itoa.c ft_split.c lst_funcs.c so_long.c str_funcs.c clearing.c \
 win_creation.c map_validation.c put_images.c enemy_patrols.c parser.c \
 plr_moves.c str_funcs2.c
 OBJ = $(SRC:.c=.o)
+INCLUDE = -lmlx -framework OpenGL -framework AppKit
+
+$(NAME) : $(OBJ)
+	$(CC) -fsanitize=address -g $(FLAGS) $(OBJ) $(INCLUDE) -o $@
 
 all: $(NAME)
 
-$(NAME) : $(OBJ) so_long.h
-	CC $(OBJ) -o $(NAME)
-
 %.o : %.c so_long.h Makefile
-	CC $(SRC) -c $< -o $@
+	$(CC) $(FLAGS) -c $< -o $@
 
 clean:
 	rm -f $(OBJ)
