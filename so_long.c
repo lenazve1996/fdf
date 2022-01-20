@@ -6,7 +6,7 @@
 /*   By: ayajirob@student.42.fr <ayajirob>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/28 20:17:18 by ayajirob@st       #+#    #+#             */
-/*   Updated: 2022/01/20 12:49:55 by ayajirob@st      ###   ########.fr       */
+/*   Updated: 2022/01/20 14:06:42 by ayajirob@st      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,6 +116,7 @@ int	main(int argc, char **argv)
 		return (1);
 	}
 	data.images->return_exit = 0;
+	printf("Moves -> %d\n", data.movements);
 	mlx_loop_hook(data.ml, ft_patrols, &data);
 	mlx_key_hook(data.wn, ft_key, &data);
 	mlx_hook(data.wn, 17, (1L << 17), ft_destroy, &data);

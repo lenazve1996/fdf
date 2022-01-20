@@ -6,7 +6,7 @@
 /*   By: ayajirob@student.42.fr <ayajirob>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/20 11:45:38 by ayajirob@st       #+#    #+#             */
-/*   Updated: 2022/01/20 13:39:14 by ayajirob@st      ###   ########.fr       */
+/*   Updated: 2022/01/20 14:06:05 by ayajirob@st      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,7 @@ int	ft_parser(char	**argv, t_data *data)
 	data->map = NULL;
 	data->ml = NULL;
 	data->movements = 0;
+	data->loop_count = 0;
 	fd = open(argv[1], O_RDONLY);
 	if (fd == -1)
 		return (ft_error_processing("Failed to open map"));
