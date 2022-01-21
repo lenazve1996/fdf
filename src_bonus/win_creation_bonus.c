@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   win_creation.c                                     :+:      :+:    :+:   */
+/*   win_creation_bonus.c                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ayajirob@student.42.fr <ayajirob>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/20 11:56:11 by ayajirob@st       #+#    #+#             */
-/*   Updated: 2022/01/20 16:41:23 by ayajirob@st      ###   ########.fr       */
+/*   Updated: 2022/01/21 13:00:44 by ayajirob@st      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "so_long.h"
+#include "so_long_bonus.h"
 
 int	ft_fill_window(char **map, t_data *data)
 {

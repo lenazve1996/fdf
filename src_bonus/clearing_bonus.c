@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   clearing.c                                         :+:      :+:    :+:   */
+/*   clearing_bonus.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ayajirob@student.42.fr <ayajirob>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/19 17:02:48 by ayajirob@st       #+#    #+#             */
-/*   Updated: 2022/01/20 13:53:55 by ayajirob@st      ###   ########.fr       */
+/*   Updated: 2022/01/21 13:00:06 by ayajirob@st      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "so_long.h"
+#include "so_long_bonus.h"
 
 void	ft_player_lose(t_img *new_p, t_data *data)
 {

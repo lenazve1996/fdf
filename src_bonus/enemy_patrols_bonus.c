@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   enemy_patrols.c                                    :+:      :+:    :+:   */
+/*   enemy_patrols_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ayajirob@student.42.fr <ayajirob>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/20 11:39:51 by ayajirob@st       #+#    #+#             */
-/*   Updated: 2022/01/20 13:56:30 by ayajirob@st      ###   ########.fr       */
+/*   Updated: 2022/01/21 13:00:10 by ayajirob@st      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "so_long.h"
+#include "so_long_bonus.h"
 
 int	ft_check_enemy_direction(t_img *new_p, t_data *data)
 {

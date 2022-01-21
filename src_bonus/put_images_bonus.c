@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   put_images.c                                       :+:      :+:    :+:   */
+/*   put_images_bonus.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ayajirob@student.42.fr <ayajirob>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/20 11:58:53 by ayajirob@st       #+#    #+#             */
-/*   Updated: 2022/01/20 12:22:11 by ayajirob@st      ###   ########.fr       */
+/*   Updated: 2022/01/21 13:00:31 by ayajirob@st      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "so_long.h"
+#include "so_long_bonus.h"
 
 void	ft_put_img_to_fond(t_data *data, void *character, int x, int y)
 {

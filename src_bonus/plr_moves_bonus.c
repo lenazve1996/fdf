@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   plr_moves.c                                        :+:      :+:    :+:   */
+/*   plr_moves_bonus.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ayajirob@student.42.fr <ayajirob>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/01/20 12:19:17 by ayajirob@st       #+#    #+#             */
-/*   Updated: 2022/01/20 12:22:07 by ayajirob@st      ###   ########.fr       */
+/*   Updated: 2022/01/21 13:00:28 by ayajirob@st      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "so_long.h"
+#include "so_long_bonus.h"
 
 static void	ft_return_exit(t_img *old_p, t_data *data)
 {
